@@ -363,14 +363,14 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
     <div class="boxes">
       <div class="box">
         <div class="box-title"><span class="btdot" style="background:var(--gold)"></span>GOLD / USD&middot;OZ</div>
-        <div class="spot-row"><span class="spot-row-lbl">BUY</span><span class="spot-pill gpill" id="bGoldBuy">3,321.49</span></div>
-        <div class="spot-row"><span class="spot-row-lbl">SELL</span><span class="spot-pill rpill" id="bGoldSell">3,322.82</span></div>
+        <div class="spot-row"><span class="spot-row-lbl">BUY</span><span class="spot-pill gpill" id="bGoldBuy">4,046.73</span></div>
+        <div class="spot-row"><span class="spot-row-lbl">SELL</span><span class="spot-pill rpill" id="bGoldSell">4,047.73</span></div>
         <div class="chg-line up" id="bGoldChg">&#9650; 1.55</div>
       </div>
       <div class="box">
         <div class="box-title"><span class="btdot" style="background:var(--silver)"></span>SILVER / USD&middot;OZ</div>
-        <div class="spot-row"><span class="spot-row-lbl">BUY</span><span class="spot-pill gpill" id="bSilverBuy">32.79</span></div>
-        <div class="spot-row"><span class="spot-row-lbl">SELL</span><span class="spot-pill rpill" id="bSilverSell">32.82</span></div>
+        <div class="spot-row"><span class="spot-row-lbl">BUY</span><span class="spot-pill gpill" id="bSilverBuy">58.08</span></div>
+        <div class="spot-row"><span class="spot-row-lbl">SELL</span><span class="spot-pill rpill" id="bSilverSell">58.11</span></div>
         <div class="chg-line up" id="bSilverChg">&#9650; 0.03</div>
       </div>
       <div class="box">
@@ -820,6 +820,15 @@ async function fetchLivePrices() {
         hs.nextElementSibling.className = 'spot-chg ' + (up ? 'up' : 'down');
       }
       updateAdminLivePrices();
+      // update right panel boxes
+      const bg = document.getElementById('bGoldBuy');
+      const bgs = document.getElementById('bGoldSell');
+      const bs = document.getElementById('bSilverBuy');
+      const bss = document.getElementById('bSilverSell');
+      if (bg)  bg.textContent  = d.gold.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if (bgs) bgs.textContent = (d.gold+1).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if (bs)  bs.textContent  = d.silver.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if (bss) bss.textContent = (d.silver+0.03).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
     }
   } catch(e) {
     console.warn('Price fetch failed, using last known price');
