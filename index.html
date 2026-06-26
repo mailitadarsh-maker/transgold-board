@@ -441,6 +441,19 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
             <div id="apLastUpdate" style="font-size:11px;color:var(--green);margin-top:3px">Waiting for API…</div>
           </div>
         </div>
+        <!-- Row 1b: Spread-adjusted USD/oz -->
+        <div style="display:flex;gap:16px;padding:6px 0 8px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:10px;color:var(--muted);letter-spacing:.1em">GOLD WITH SPREAD</span>
+            <span id="apSpreadGold" style="font-size:16px;font-weight:700;color:var(--gold)">—</span>
+            <span style="font-size:9px;color:var(--muted)">USD/oz</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:10px;color:var(--muted);letter-spacing:.1em">SILVER WITH SPREAD</span>
+            <span id="apSpreadSilver" style="font-size:16px;font-weight:700;color:var(--silver)">—</span>
+            <span style="font-size:9px;color:var(--muted)">USD/oz</span>
+          </div>
+        </div>
         <!-- Row 2: After spread board prices -->
         <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:10px">
           <div style="font-size:9px;color:var(--muted);letter-spacing:.1em;margin-bottom:8px">BOARD PRICES AFTER SPREAD  ·  BUY = ASK  |  SELL = BID</div>
@@ -897,6 +910,13 @@ function updateAdminLivePrices() {
   const es = document.getElementById('apLiveSilver');
   if (el) el.textContent = '$' + spotUSD.gold.toLocaleString('en', {minimumFractionDigits:3,maximumFractionDigits:3});
   if (es) es.textContent = '$' + spotUSD.silver.toLocaleString('en', {minimumFractionDigits:3,maximumFractionDigits:3});
+  // Spread-adjusted USD/oz in admin
+  const esg = document.getElementById('apSpreadGold');
+  const ess = document.getElementById('apSpreadSilver');
+  const gSpreadOZ = spotUSD.gold   + (MASTER.goldAsk  * WEIGHT_GM.gold[0])   / (WEIGHT.gold[0]   * AED * PURITY.gold[0]);
+  const sSpreadOZ = spotUSD.silver + (MASTER.silverAsk * WEIGHT_GM.silver[0]) / (WEIGHT.silver[0] * AED);
+  if (esg) esg.textContent = '$' + gSpreadOZ.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3});
+  if (ess) ess.textContent = '$' + sSpreadOZ.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3});
   // After spread — show 999·1GM gold and 999·1KG silver board prices
   const fmt2 = v => v.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
   applyMaster();
