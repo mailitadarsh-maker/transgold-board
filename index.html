@@ -1149,26 +1149,12 @@ async function fetchLivePrices() {
 }
 
 
-function nudge(v){return v*(1+(Math.random()-.5)*0.0003)}
 function flashEl(el){if(!el)return;el.style.transition='background 0.05s';el.style.background='rgba(212,169,74,0.5)';setTimeout(function(){el.style.transition='background 0.3s';el.style.background='';},150);}
 function updatePrices(){
+  // Visual-only heartbeat flash, no price mutation. Real prices only change
+  // when fetchLivePrices() gets fresh data from the API (every 30s).
   ['hGold','hSilver','bGoldBuy','bGoldSell','bSilverBuy','bSilverSell'].forEach(function(id){flashEl(document.getElementById(id));});
   document.querySelectorAll('.buy-price,.sell-price').forEach(function(el){flashEl(el);});
-  // gentle nudge while waiting for next API fetch
-  spotUSD.gold   = nudge(spotUSD.gold);
-  spotUSD.silver = nudge(spotUSD.silver);
-  calcPrices();
-  ['gold','silver'].forEach(type=>{
-    PRICES[type].forEach((item,i)=>{
-      const rows=document.querySelectorAll('#'+type+'Rows .row');
-      if(rows[i]){
-        rows[i].querySelector('.buy-price').textContent=fmt(item.buy);
-        rows[i].querySelector('.sell-price').textContent=fmt(item.sell);
-        rows[i].classList.add('fg');
-        setTimeout(()=>rows[i].classList.remove('fg'),500);
-      }
-    });
-  });
 }
 function updateClock(){
   const n=new Date();
