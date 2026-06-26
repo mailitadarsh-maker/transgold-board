@@ -422,20 +422,57 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
       <!-- LIVE PRICE STATUS -->
       <div class="ap-section">
         <div class="ap-section-title">&#9632; Live Price Feed</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
-          <div style="display:flex;flex-direction:column;gap:6px">
+        <!-- Row 1: Raw Arakkal + Last Updated -->
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 6px">
+          <div style="display:flex;flex-direction:column;gap:5px">
             <div style="display:flex;align-items:center;gap:8px">
               <span style="font-size:10px;color:var(--muted);letter-spacing:.1em">GOLD (XAU/USD)</span>
               <span id="apLiveGold" style="font-size:16px;font-weight:700;color:var(--gold)">—</span>
+              <span style="font-size:9px;color:var(--muted)">(Arakkal)</span>
             </div>
             <div style="display:flex;align-items:center;gap:8px">
               <span style="font-size:10px;color:var(--muted);letter-spacing:.1em">SILVER (XAG/USD)</span>
               <span id="apLiveSilver" style="font-size:16px;font-weight:700;color:var(--silver)">—</span>
+              <span style="font-size:9px;color:var(--muted)">(Arakkal)</span>
             </div>
           </div>
           <div style="text-align:right">
             <div style="font-size:9px;color:var(--muted);letter-spacing:.1em">LAST UPDATED</div>
             <div id="apLastUpdate" style="font-size:11px;color:var(--green);margin-top:3px">Waiting for API…</div>
+          </div>
+        </div>
+        <!-- Row 2: After spread board prices -->
+        <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:10px">
+          <div style="font-size:9px;color:var(--muted);letter-spacing:.1em;margin-bottom:8px">BOARD PRICES AFTER SPREAD</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <div style="font-size:9px;color:var(--muted);margin-bottom:4px">GOLD 999·1GM (AED)</div>
+              <div style="display:flex;gap:10px;align-items:baseline">
+                <div>
+                  <div style="font-size:9px;color:#4ade80">BUY</div>
+                  <div style="font-size:15px;font-weight:700;color:#4ade80" id="apAfterGoldBuy">—</div>
+                </div>
+                <div style="color:var(--muted);font-size:12px">/</div>
+                <div>
+                  <div style="font-size:9px;color:#f87171">SELL</div>
+                  <div style="font-size:15px;font-weight:700;color:#f87171" id="apAfterGoldSell">—</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--muted);margin-bottom:4px">SILVER 999·1KG (AED)</div>
+              <div style="display:flex;gap:10px;align-items:baseline">
+                <div>
+                  <div style="font-size:9px;color:#4ade80">BUY</div>
+                  <div style="font-size:15px;font-weight:700;color:#4ade80" id="apAfterSilverBuy">—</div>
+                </div>
+                <div style="color:var(--muted);font-size:12px">/</div>
+                <div>
+                  <div style="font-size:9px;color:#f87171">SELL</div>
+                  <div style="font-size:15px;font-weight:700;color:#f87171" id="apAfterSilverSell">—</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -790,8 +827,23 @@ function syncOverrideInputs(type, i) {
 function updateAdminLivePrices() {
   const el = document.getElementById('apLiveGold');
   const es = document.getElementById('apLiveSilver');
-  if (el) el.textContent = '$' + spotUSD.gold.toLocaleString('en', {minimumFractionDigits:2});
-  if (es) es.textContent = '$' + spotUSD.silver.toLocaleString('en', {minimumFractionDigits:2});
+  if (el) el.textContent = '$' + spotUSD.gold.toLocaleString('en', {minimumFractionDigits:3,maximumFractionDigits:3});
+  if (es) es.textContent = '$' + spotUSD.silver.toLocaleString('en', {minimumFractionDigits:3,maximumFractionDigits:3});
+  // After spread — show 999·1GM gold and 999·1KG silver board prices
+  const fmt2 = v => v.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+  applyMaster();
+  // Gold 999·1GM is index 3
+  const goldMid  = spotUSD.gold   * WEIGHT.gold[3]   * AED * PURITY.gold[3];
+  const goldBuy  = document.getElementById('apAfterGoldBuy');
+  const goldSell = document.getElementById('apAfterGoldSell');
+  if (goldBuy)  goldBuy.textContent  = fmt2(goldMid + BID.gold[3]);
+  if (goldSell) goldSell.textContent = fmt2(goldMid + ASK.gold[3]);
+  // Silver 999·1KG is index 0
+  const silvMid  = spotUSD.silver * WEIGHT.silver[0] * AED;
+  const silvBuy  = document.getElementById('apAfterSilverBuy');
+  const silvSell = document.getElementById('apAfterSilverSell');
+  if (silvBuy)  silvBuy.textContent  = fmt2(silvMid + BID.silver[0]);
+  if (silvSell) silvSell.textContent = fmt2(silvMid + ASK.silver[0]);
   const upd = document.getElementById('apLastUpdate');
   if (upd) upd.textContent = new Date().toLocaleTimeString('en-AE', {hour12:false});
 }
