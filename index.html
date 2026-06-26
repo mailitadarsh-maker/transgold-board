@@ -789,25 +789,38 @@ function calcPrices() {
 }
 
 function updateAdminPreviews() {
-  // Update live breakdown summary tables (Gold + Silver)
-  ['gold','silver'].forEach(type => {
-    const count = type === 'gold' ? 5 : 2;
-    for (let i = 0; i < count; i++) {
-      applyMaster();
-      const bidEl = document.getElementById('sum_bid_'+type+'_'+i);
-      const askEl = document.getElementById('sum_ask_'+type+'_'+i);
-      if (bidEl) bidEl.textContent = BID[type][i].toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
-      if (askEl) askEl.textContent = ('+'+ASK[type][i].toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})).replace('+-','-');
-    }
-  });
-
-  // Temporarily apply master inputs to compute preview prices
-  const tmpMaster = {
+  // Read live master values straight from the input fields (do NOT rely on saved MASTER global)
+  const liveMaster = {
     goldBid:   parseFloat(document.getElementById('masterGoldBid').value)   || 0,
     goldAsk:   parseFloat(document.getElementById('masterGoldAsk').value)   || 0,
     silverBid: parseFloat(document.getElementById('masterSilverBid').value) || 0,
     silverAsk: parseFloat(document.getElementById('masterSilverAsk').value) || 0,
   };
+
+  // Update live breakdown summary tables (Gold + Silver) using LIVE input values
+  ['gold','silver'].forEach(type => {
+    const count = type === 'gold' ? 5 : 2;
+    for (let i = 0; i < count; i++) {
+      const wg = WEIGHT_GM[type][i];
+      const purity = (type === 'gold') ? (PURITY.gold[i] || 1.0) : 1.0;
+      const chk = document.getElementById('ovr_'+type+'_'+i);
+      let bidVal, askVal;
+      if (chk && chk.checked) {
+        bidVal = parseFloat(document.getElementById('ovrBid_'+type+'_'+i).value) || 0;
+        askVal = parseFloat(document.getElementById('ovrAsk_'+type+'_'+i).value) || 0;
+      } else {
+        bidVal = liveMaster[type+'Bid'] * wg * purity;
+        askVal = liveMaster[type+'Ask'] * wg * purity;
+      }
+      const bidEl = document.getElementById('sum_bid_'+type+'_'+i);
+      const askEl = document.getElementById('sum_ask_'+type+'_'+i);
+      if (bidEl) bidEl.textContent = bidVal.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if (askEl) askEl.textContent = ('+'+askVal.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})).replace('+-','-');
+    }
+  });
+
+  // Reuse liveMaster (already computed above) for the per-row BOARD PRICE preview
+  const tmpMaster = liveMaster;
   const fmt2 = v => v.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
   [['gold',5],['silver',2]].forEach(([type, count]) => {
     for (let i = 0; i < count; i++) {
