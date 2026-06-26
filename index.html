@@ -1144,13 +1144,16 @@ async function fetchLivePrices() {
       const bgs = document.getElementById('bGoldSell');
       const bs = document.getElementById('bSilverBuy');
       const bss = document.getElementById('bSilverSell');
-      // Sidebar uses PRICES[] which already has real BUY/SELL from calcPrices()
-      const g999idx = 3; // Gold 999·1GM row index
-      const s999idx = 0; // Silver 999·1KG row index
-      if (bg)  { bg.textContent  = fmt(PRICES.gold[g999idx].buy);  flash(bg); }
-      if (bgs) { bgs.textContent = fmt(PRICES.gold[g999idx].sell); flash(bgs); }
-      if (bs)  { bs.textContent  = fmt(PRICES.silver[s999idx].buy);  flash(bs); }
-      if (bss) { bss.textContent = fmt(PRICES.silver[s999idx].sell); flash(bss); }
+      // Sidebar shows USD/oz with spread applied
+      const fmt3 = v => v.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      const gBuyUSD  = d.gold + (MASTER.goldAsk  * WEIGHT_GM.gold[0]) / (WEIGHT.gold[0] * AED * PURITY.gold[0]);
+      const gSellUSD = d.gold + (MASTER.goldBid  * WEIGHT_GM.gold[0]) / (WEIGHT.gold[0] * AED * PURITY.gold[0]);
+      const sBuyUSD  = d.silver + (MASTER.silverAsk  * WEIGHT_GM.silver[0]) / (WEIGHT.silver[0] * AED);
+      const sSellUSD = d.silver + (MASTER.silverBid  * WEIGHT_GM.silver[0]) / (WEIGHT.silver[0] * AED);
+      if (bg)  { bg.textContent  = fmt3(gBuyUSD);  flash(bg); }
+      if (bgs) { bgs.textContent = fmt3(gSellUSD); flash(bgs); }
+      if (bs)  { bs.textContent  = fmt3(sBuyUSD);  flash(bs); }
+      if (bss) { bss.textContent = fmt3(sSellUSD); flash(bss); }
       if (hg)  flash(hg);
       if (hs)  flash(hs);
     }
