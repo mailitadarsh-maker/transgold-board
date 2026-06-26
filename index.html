@@ -440,73 +440,81 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
         </div>
       </div>
 
-      <!-- SPREAD — GOLD -->
+      <!-- BID / ASK — MASTER -->
       <div class="ap-section">
-        <div class="ap-section-title">&#9632; Gold Spread — AED per row</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div class="spread-row">
-            <span class="spread-lbl">9999 · 1 KG</span>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:10px;color:var(--muted)">+/−</span>
-              <input type="number" class="spread-input" id="spGold0" value="13000" step="100">
-              <span style="font-size:10px;color:var(--muted)">AED</span>
-            </div>
+        <div class="ap-section-title">&#9632; Gold — Master Offset (AED per gram)</div>
+        <div style="display:flex;gap:10px;margin-bottom:4px">
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">BID (e.g. −5)</div>
+            <input type="number" class="spread-input" id="masterGoldBid" value="-5" step="0.5" style="width:100%">
           </div>
-          <div class="spread-row">
-            <span class="spread-lbl">995 · 1 KG</span>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:10px;color:var(--muted)">+/−</span>
-              <input type="number" class="spread-input" id="spGold1" value="11000" step="100">
-              <span style="font-size:10px;color:var(--muted)">AED</span>
-            </div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">ASK (e.g. +5)</div>
+            <input type="number" class="spread-input" id="masterGoldAsk" value="5" step="0.5" style="width:100%">
           </div>
-          <div class="spread-row">
-            <span class="spread-lbl">916 · 1 GM</span>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:10px;color:var(--muted)">+/−</span>
-              <input type="number" class="spread-input" id="spGold2" value="8" step="0.5">
-              <span style="font-size:10px;color:var(--muted)">AED</span>
+        </div>
+        <div style="font-size:10px;color:var(--muted)">Auto-scales to all gold rows by weight &amp; purity</div>
+      </div>
+
+      <!-- GOLD ROW OVERRIDES -->
+      <div class="ap-section">
+        <div class="ap-section-title">&#9632; Gold — Row Overrides (optional)</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:-4px">✔ Check a row to set custom BID/ASK for that row only</div>
+          ${['9999·1KG','995·1KG','916·1GM','999·1GM','1TB·1TTB'].map((lbl,i) => `
+          <div class="spread-row" style="align-items:center;gap:8px">
+            <input type="checkbox" id="ovr_gold_${i}" onchange="syncOverrideInputs('gold',${i})" style="accent-color:var(--gold);width:14px;height:14px">
+            <span class="spread-lbl" style="min-width:72px">${lbl}</span>
+            <div style="display:flex;gap:6px;flex:1">
+              <div style="flex:1">
+                <div style="font-size:9px;color:var(--muted)">BID</div>
+                <input type="number" class="spread-input" id="ovrBid_gold_${i}" value="0" step="0.5" disabled style="width:100%">
+              </div>
+              <div style="flex:1">
+                <div style="font-size:9px;color:var(--muted)">ASK</div>
+                <input type="number" class="spread-input" id="ovrAsk_gold_${i}" value="0" step="0.5" disabled style="width:100%">
+              </div>
             </div>
-          </div>
-          <div class="spread-row">
-            <span class="spread-lbl">999 · 1 GM</span>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:10px;color:var(--muted)">+/−</span>
-              <input type="number" class="spread-input" id="spGold3" value="8" step="0.5">
-              <span style="font-size:10px;color:var(--muted)">AED</span>
-            </div>
-          </div>
-          <div class="spread-row">
-            <span class="spread-lbl">1TB · 1 TTB</span>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:10px;color:var(--muted)">+/−</span>
-              <input type="number" class="spread-input" id="spGold4" value="1516" step="10">
-              <span style="font-size:10px;color:var(--muted)">AED</span>
-            </div>
-          </div>
+          </div>`).join('')}
         </div>
       </div>
 
-      <!-- SPREAD — SILVER -->
+      <!-- SILVER MASTER -->
       <div class="ap-section">
-        <div class="ap-section-title">&#9632; Silver Spread — AED per row</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div class="spread-row">
-            <span class="spread-lbl">999 · 1 KG</span>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:10px;color:var(--muted)">+/−</span>
-              <input type="number" class="spread-input" id="spSilver0" value="1300" step="10">
-              <span style="font-size:10px;color:var(--muted)">AED</span>
-            </div>
+        <div class="ap-section-title">&#9632; Silver — Master Offset (AED per gram)</div>
+        <div style="display:flex;gap:10px;margin-bottom:4px">
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">BID (e.g. −0.5)</div>
+            <input type="number" class="spread-input" id="masterSilverBid" value="-0.5" step="0.1" style="width:100%">
           </div>
-          <div class="spread-row">
-            <span class="spread-lbl">999 · 1 TTB</span>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span style="font-size:10px;color:var(--muted)">+/−</span>
-              <input type="number" class="spread-input" id="spSilver1" value="151" step="1">
-              <span style="font-size:10px;color:var(--muted)">AED</span>
-            </div>
+          <div style="flex:1">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">ASK (e.g. +0.5)</div>
+            <input type="number" class="spread-input" id="masterSilverAsk" value="0.5" step="0.1" style="width:100%">
           </div>
+        </div>
+        <div style="font-size:10px;color:var(--muted)">Auto-scales to all silver rows by weight</div>
+      </div>
+
+      <!-- SILVER ROW OVERRIDES -->
+      <div class="ap-section">
+        <div class="ap-section-title">&#9632; Silver — Row Overrides (optional)</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:-4px">✔ Check a row to set custom BID/ASK for that row only</div>
+          ${['999·1KG','999·1TTB'].map((lbl,i) => `
+          <div class="spread-row" style="align-items:center;gap:8px">
+            <input type="checkbox" id="ovr_silver_${i}" onchange="syncOverrideInputs('silver',${i})" style="accent-color:var(--gold);width:14px;height:14px">
+            <span class="spread-lbl" style="min-width:72px">${lbl}</span>
+            <div style="display:flex;gap:6px;flex:1">
+              <div style="flex:1">
+                <div style="font-size:9px;color:var(--muted)">BID</div>
+                <input type="number" class="spread-input" id="ovrBid_silver_${i}" value="0" step="0.1" disabled style="width:100%">
+              </div>
+              <div style="flex:1">
+                <div style="font-size:9px;color:var(--muted)">ASK</div>
+                <input type="number" class="spread-input" id="ovrAsk_silver_${i}" value="0" step="0.1" disabled style="width:100%">
+              </div>
+            </div>
+          </div>`).join('')}
         </div>
       </div>
 
@@ -561,15 +569,25 @@ function renderRows(items,id,type){
     </div>`).join('');
 }
 
-// ── SPREAD CONFIG (per row, in AED) ─────────────────────────────────────────
-// buy = midprice - spread/2 | sell = midprice + spread/2
+// ── BID / ASK CONFIG ────────────────────────────────────────────────────────
+// buy  = mid + BID  (BID is usually negative, e.g. -5)
+// sell = mid + ASK  (ASK is usually positive, e.g. +5)
 const PURITY = {
   gold: [1.0, 0.995, 0.916, 0.999, 1.0]
 };
-let SPREAD = {
-  gold:   [13000, 11000, 8, 8, 1516],
-  silver: [1300, 151]
+
+// Master per-gram offsets (AED/gm). Applied to all rows by weight.
+let MASTER = { goldBid: -5, goldAsk: 5, silverBid: -0.5, silverAsk: 0.5 };
+
+// Per-row override flags and values (null = use master)
+let OVERRIDE = {
+  gold:   [null, null, null, null, null],   // null = auto from master
+  silver: [null, null]
 };
+
+// Computed BID/ASK per row (filled by applyMaster)
+let BID = { gold: [0,0,0,0,0], silver: [0,0] };
+let ASK = { gold: [0,0,0,0,0], silver: [0,0] };
 
 // Weight multipliers: how many troy oz per unit
 // 1 troy oz = 31.1035g
@@ -582,28 +600,86 @@ const AED = 3.6725; // USD→AED fixed rate (will come from API later)
 // Spot prices — will be replaced by API; fallback hardcoded
 let spotUSD = { gold: 4046.73, silver: 58.08 };
 
+// Weight in grams per unit (for master per-gram calculation)
+const WEIGHT_GM = {
+  gold:   [1000, 1000, 1, 1, 116.64],
+  silver: [1000, 116.64]
+};
+
+function applyMaster() {
+  ['gold','silver'].forEach(type => {
+    BID[type].forEach((_, i) => {
+      if (OVERRIDE[type][i] !== null) {
+        BID[type][i] = OVERRIDE[type][i].bid;
+        ASK[type][i] = OVERRIDE[type][i].ask;
+      } else {
+        const wg = WEIGHT_GM[type][i];
+        const purity = (type === 'gold' && PURITY.gold[i]) ? PURITY.gold[i] : 1.0;
+        BID[type][i] = MASTER[type+'Bid'] * wg * purity;
+        ASK[type][i] = MASTER[type+'Ask'] * wg * purity;
+      }
+    });
+  });
+}
+
 function calcPrices() {
+  applyMaster();
   PRICES.gold.forEach((item, i) => {
     const purity = PURITY.gold[i] !== undefined ? PURITY.gold[i] : 1.0;
     const mid = spotUSD.gold * WEIGHT.gold[i] * AED * purity;
-    item.buy  = mid - SPREAD.gold[i] / 2;
-    item.sell = mid + SPREAD.gold[i] / 2;
+    item.buy  = mid + BID.gold[i];
+    item.sell = mid + ASK.gold[i];
   });
   PRICES.silver.forEach((item, i) => {
     const mid = spotUSD.silver * WEIGHT.silver[i] * AED;
-    item.buy  = mid - SPREAD.silver[i] / 2;
-    item.sell = mid + SPREAD.silver[i] / 2;
+    item.buy  = mid + BID.silver[i];
+    item.sell = mid + ASK.silver[i];
   });
 }
 
 function saveSpread() {
-  SPREAD.gold   = [0,1,2,3,4].map(i => parseFloat(document.getElementById('spGold'+i).value)   || 0);
-  SPREAD.silver = [0,1].map(i   => parseFloat(document.getElementById('spSilver'+i).value) || 0);
+  // Save master per-gram values
+  MASTER.goldBid   = parseFloat(document.getElementById('masterGoldBid').value)   || 0;
+  MASTER.goldAsk   = parseFloat(document.getElementById('masterGoldAsk').value)   || 0;
+  MASTER.silverBid = parseFloat(document.getElementById('masterSilverBid').value) || 0;
+  MASTER.silverAsk = parseFloat(document.getElementById('masterSilverAsk').value) || 0;
+
+  // Save per-row overrides
+  const goldLabels   = ['9999·1KG','995·1KG','916·1GM','999·1GM','1TB·1TTB'];
+  const silverLabels = ['999·1KG','999·1TTB'];
+  [['gold',5],['silver',2]].forEach(([type, count]) => {
+    for (let i = 0; i < count; i++) {
+      const chk = document.getElementById('ovr_'+type+'_'+i);
+      if (chk && chk.checked) {
+        const bid = parseFloat(document.getElementById('ovrBid_'+type+'_'+i).value);
+        const ask = parseFloat(document.getElementById('ovrAsk_'+type+'_'+i).value);
+        OVERRIDE[type][i] = { bid, ask };
+      } else {
+        OVERRIDE[type][i] = null;
+      }
+    }
+  });
+
   calcPrices();
   renderRows(PRICES.gold,   'goldRows',   'gold');
   renderRows(PRICES.silver, 'silverRows', 'silver');
-  toast('✓ Spread saved — board updated');
+  toast('✓ Saved — board updated');
   closeAdmin();
+}
+
+function syncOverrideInputs(type, i) {
+  const chk = document.getElementById('ovr_'+type+'_'+i);
+  const bidEl = document.getElementById('ovrBid_'+type+'_'+i);
+  const askEl = document.getElementById('ovrAsk_'+type+'_'+i);
+  if (!chk || !bidEl || !askEl) return;
+  bidEl.disabled = !chk.checked;
+  askEl.disabled = !chk.checked;
+  if (!chk.checked) {
+    // auto-fill computed value from master
+    applyMaster();
+    bidEl.value = BID[type][i].toFixed(2);
+    askEl.value = ASK[type][i].toFixed(2);
+  }
 }
 
 function updateAdminLivePrices() {
