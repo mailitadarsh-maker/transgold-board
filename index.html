@@ -791,13 +791,29 @@ async function fetchLivePrices() {
     const r = await fetch('/api/prices.php');
     const d = await r.json();
     if (d.ok && d.gold) {
+      const prevGold   = spotUSD.gold;
+      const prevSilver = spotUSD.silver;
       spotUSD.gold   = d.gold;
       spotUSD.silver = d.silver;
       calcPrices();
       renderRows(PRICES.gold,   'goldRows',   'gold');
       renderRows(PRICES.silver, 'silverRows', 'silver');
-      // update header spot display
-      document.querySelector('.spot-val.gold-val') && (document.querySelector('.spot-val.gold-val').textContent = '$' + d.gold.toLocaleString('en',{minimumFractionDigits:2}));
+      const hg = document.getElementById('hGold');
+      const hs = document.getElementById('hSilver');
+      if (hg) hg.textContent = d.gold.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if (hs) hs.textContent = d.silver.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      const gDiff = (d.gold - prevGold).toFixed(2);
+      const sDiff = (d.silver - prevSilver).toFixed(2);
+      if (hg && hg.nextElementSibling) {
+        const up = parseFloat(gDiff) >= 0;
+        hg.nextElementSibling.textContent = (up ? String.fromCharCode(9650) : String.fromCharCode(9660)) + ' ' + Math.abs(gDiff);
+        hg.nextElementSibling.className = 'spot-chg ' + (up ? 'up' : 'down');
+      }
+      if (hs && hs.nextElementSibling) {
+        const up = parseFloat(sDiff) >= 0;
+        hs.nextElementSibling.textContent = (up ? String.fromCharCode(9650) : String.fromCharCode(9660)) + ' ' + Math.abs(sDiff);
+        hs.nextElementSibling.className = 'spot-chg ' + (up ? 'up' : 'down');
+      }
       updateAdminLivePrices();
     }
   } catch(e) {
