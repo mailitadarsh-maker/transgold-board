@@ -826,8 +826,6 @@ async function fetchLivePrices() {
       const bgs = document.getElementById('bGoldSell');
       const bs = document.getElementById('bSilverBuy');
       const bss = document.getElementById('bSilverSell');
-      const hg = document.getElementById('hGold');
-      const hs = document.getElementById('hSilver');
       if (bg)  { bg.textContent  = d.gold.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); flash(bg); }
       if (bgs) { bgs.textContent = (d.gold+1).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); flash(bgs); }
       if (bs)  { bs.textContent  = d.silver.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); flash(bs); }
