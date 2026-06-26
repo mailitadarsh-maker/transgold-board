@@ -1,0 +1,15 @@
+media/slots.json
+media/*.jpg
+media/*.jpeg
+media/*.png
+media/*.gif
+media/*.webp
+media/*.mp4
+media/*.webm
+media/*.mov
+media/*.ogv
+!media/.gitkeep
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
