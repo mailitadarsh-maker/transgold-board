@@ -157,29 +157,129 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
 .ap-toast.show{display:block;animation:fadeup .3s ease}
 @keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-/* RESPONSIVE */
+/* ═══════════════════════════════════════════
+   RESPONSIVE — TABLET  ≤900px
+═══════════════════════════════════════════ */
 @media(max-width:900px){
   html,body{overflow:auto}
   .body{flex-direction:column;overflow:visible}
-  .right{width:100%;border-left:none;border-top:1px solid var(--border-gold);flex-direction:row;height:220px}
+
+  /* right panel: horizontal strip below price list */
+  .right{width:100%;border-left:none;border-top:1px solid var(--border-gold);
+         flex-direction:row;height:200px}
   .right.collapsed{width:100%;height:0;border-top:none}
   .media-area{flex:1;min-height:unset}
   .boxes{flex-direction:row;flex:1;border-top:none;border-left:1px solid var(--border-gold)}
   .box{border-bottom:none;border-right:1px solid var(--border-gold);flex:1}
   .box:last-child{border-right:none}
-  .hdr{padding:14px 20px;min-height:unset}
+
+  /* header */
+  .hdr{padding:12px 20px;min-height:unset}
   .clock{font-size:26px}
   .ap-row{grid-template-columns:1fr 1fr 1fr 70px}
 }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — MOBILE  ≤580px
+═══════════════════════════════════════════ */
 @media(max-width:580px){
-  .right{height:auto;flex-direction:column}
-  .media-area{height:160px;flex:unset}
-  .boxes{flex-direction:column}
-  .box{border-right:none;border-bottom:1px solid var(--border-gold)}
-  .tbl-head,.row{grid-template-columns:1.2fr 110px 1fr 1fr}
+  /* ── scrollable page ── */
+  html,body{height:auto;overflow:auto}
+  body{flex-direction:column}
+
+  /* ── HEADER: two rows ──
+     Row 1: logo  |  clock
+     Row 2: gold spot  •  LIVE  •  silver spot
+  ── */
+  .hdr{
+    flex-wrap:wrap;
+    padding:12px 16px;
+    gap:8px;
+    min-height:unset;
+  }
+  .logo{min-width:unset;flex:1}
+  .logo img{height:40px}
+  /* hide fallback svg text on very small, keep icon */
+  .logo-text .logo-sub{display:none}
+  .logo-name{font-size:16px}
+
+  /* clock right-aligned, same row as logo */
+  .hdr-time{min-width:unset;order:2}
+  .clock{font-size:22px;letter-spacing:.02em}
+  .dateline{font-size:8px;letter-spacing:.1em}
+
+  /* spot prices: full-width second row */
+  .hdr-mid{
+    width:100%;
+    order:3;
+    gap:12px;
+    justify-content:space-around;
+    padding-top:6px;
+    border-top:1px solid rgba(212,169,74,.12);
+  }
+  .spot-val{font-size:16px}
+  .spot-chg{font-size:10px}
+  .live-badge{font-size:9px;padding:5px 10px}
+
+  /* ── PRICE ROWS: 2-row card layout ──
+     Top:    [Name + badge]   [weight tag]
+     Bottom: [BUY price]      [SELL price]
+  ── */
+  .tbl-head{display:none} /* hide column headers — redundant with per-cell labels */
+
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto auto;
+    gap:8px 0;
+    padding:12px 14px 12px 18px;
+  }
+
+  /* col 1 row 1: name + purity badge */
+  .row > div:nth-child(1){
+    grid-column:1;grid-row:1;
+    align-self:center;
+  }
+  /* col 2 row 1: weight tag — right-aligned */
+  .row > div:nth-child(2){
+    grid-column:2;grid-row:1;
+    display:flex;justify-content:flex-end;align-self:center;
+  }
+  /* col 1 row 2: BUY */
+  .row > div:nth-child(3){
+    grid-column:1;grid-row:2;
+  }
+  /* col 2 row 2: SELL */
+  .row > div:nth-child(4){
+    grid-column:2;grid-row:2;
+    text-align:right;
+  }
+
+  /* scale down text so numbers don't clip */
+  .cname{font-size:15px}
+  .badge{font-size:11px;padding:2px 7px;margin-left:5px}
+  .wtag{font-size:13px;padding:5px 10px;min-width:unset}
+  .buy-price,.sell-price{font-size:15px}
+  .plbl{font-size:8px}
+
+  /* ── RIGHT PANEL: compact vertical stack ── */
+  .right{height:auto;flex-direction:column;border-top:1px solid var(--border-gold)}
+  .media-area{height:180px;flex:unset}
+  .boxes{flex-direction:row;flex:unset}
+  .box{flex:1;border-right:1px solid var(--border-gold);border-bottom:none;padding:10px 10px}
+  .box:last-child{border-right:none}
+  .spot-pill{font-size:12px;padding:2px 8px}
+  .box-title{font-size:8px}
+  .sent-lbls{font-size:9px}
+
+  /* ── ADMIN PANEL ── */
   .ap-grid{grid-template-columns:1fr}
   .ap-row{grid-template-columns:1fr 1fr;gap:6px}
   .ap-lbl{grid-column:1/-1}
+  .ap-body{padding:16px}
+  .spread-row{flex-wrap:wrap;gap:8px}
+  .spread-lbl{min-width:unset;width:100%;font-size:10px}
+  .spread-input{width:90px}
 }
 </style>
 </head>
@@ -187,7 +287,7 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
 
 <header class="hdr">
   <div class="logo" id="adminTrigger" style="cursor:pointer">
-    <img src="logo.png" alt="Transgold Markets"
+    <img src="/logo.png" alt="Transgold Markets"
          onerror="this.style.display='none';document.getElementById('fallbackLogo').style.display='flex'">
     <div id="fallbackLogo" style="display:none;align-items:center;gap:10px">
       <svg width="44" height="44" viewBox="0 0 32 32" fill="none">
@@ -502,12 +602,13 @@ function updateAdminLivePrices() {
   if (upd) upd.textContent = new Date().toLocaleTimeString('en-AE', {hour12:false});
 }
 
-// ── MEDIA SLOTS ─────────────────────────────────────────────────────────────
+// ── MEDIA SLOTS (server-side persistent storage) ─────────────────────────────
 const MAX_SLOTS = 3;
-let mediaSlots = [null, null, null]; // {url, type, name}
+let mediaSlots = [null, null, null]; // {url, type, name, filename}
 let slideshowIndex = 0;
 let slideshowTimer = null;
 const SLIDE_DURATION = 5000; // 5s per slide
+const UPLOAD_PHP = '/upload.php';
 
 function renderMediaSlots() {
   const container = document.getElementById('mediaSlots');
@@ -519,7 +620,7 @@ function renderMediaSlots() {
         <span style="font-size:9px;color:var(--muted);text-transform:uppercase">${slot.type}</span>
         <button class="ap-btn ap-btn-danger" style="padding:4px 10px;font-size:10px" onclick="removeSlot(${i})">✕</button>
       ` : `
-        <label style="flex:1;cursor:pointer;font-size:11px;color:var(--muted)">
+        <label style="flex:1;cursor:pointer;font-size:11px;color:var(--muted)" id="slotLabel${i}">
           Click to upload image or video
           <input type="file" accept="image/*,video/*" style="display:none" onchange="handleSlotUpload(event,${i})">
         </label>
@@ -528,29 +629,78 @@ function renderMediaSlots() {
     </div>`).join('');
 }
 
-function handleSlotUpload(e, i) {
+async function handleSlotUpload(e, i) {
   const file = e.target.files[0];
   if (!file) return;
-  const url = URL.createObjectURL(file);
-  if (mediaSlots[i]?.url) URL.revokeObjectURL(mediaSlots[i].url);
-  mediaSlots[i] = { url, type: file.type.startsWith('video') ? 'video' : 'image', name: file.name };
-  renderMediaSlots();
-  rebuildSlideshow();
-  toast(`Slot ${i+1} loaded — showing on board`);
+
+  // Show uploading state
+  const label = document.getElementById('slotLabel' + i);
+  if (label) label.textContent = '⏳ Uploading…';
+
+  const fd = new FormData();
+  fd.append('action', 'upload');
+  fd.append('slot', i);
+  fd.append('file', file);
+
+  try {
+    const r   = await fetch(UPLOAD_PHP, { method: 'POST', body: fd });
+    const res = await r.json();
+    if (!res.success) throw new Error(res.error || 'Upload failed');
+    mediaSlots = res.slots;
+    renderMediaSlots();
+    rebuildSlideshow();
+    toast(`✓ Slot ${i+1} saved to server`);
+  } catch (err) {
+    toast('Upload error: ' + err.message, 'err');
+    renderMediaSlots(); // reset label
+  }
 }
 
-function removeSlot(i) {
-  if (mediaSlots[i]?.url) URL.revokeObjectURL(mediaSlots[i].url);
-  mediaSlots[i] = null;
-  renderMediaSlots();
-  rebuildSlideshow();
+async function removeSlot(i) {
+  const fd = new FormData();
+  fd.append('action', 'remove');
+  fd.append('slot', i);
+  try {
+    const r   = await fetch(UPLOAD_PHP, { method: 'POST', body: fd });
+    const res = await r.json();
+    if (!res.success) throw new Error(res.error);
+    mediaSlots = res.slots;
+    renderMediaSlots();
+    rebuildSlideshow();
+    toast(`Slot ${i+1} removed`);
+  } catch (err) {
+    toast('Remove error: ' + err.message, 'err');
+  }
 }
 
-function removeAllMedia() {
-  mediaSlots = [null, null, null];
-  renderMediaSlots();
-  rebuildSlideshow();
-  toast('All media cleared');
+async function removeAllMedia() {
+  const fd = new FormData();
+  fd.append('action', 'clear');
+  try {
+    const r   = await fetch(UPLOAD_PHP, { method: 'POST', body: fd });
+    const res = await r.json();
+    if (!res.success) throw new Error(res.error);
+    mediaSlots = res.slots;
+    renderMediaSlots();
+    rebuildSlideshow();
+    toast('All media cleared');
+  } catch (err) {
+    toast('Clear error: ' + err.message, 'err');
+  }
+}
+
+// Load persisted slots from server on page load
+async function loadServerMedia() {
+  try {
+    const r   = await fetch(UPLOAD_PHP + '?action=list');
+    const res = await r.json();
+    if (res.success && Array.isArray(res.slots)) {
+      mediaSlots = res.slots;
+      rebuildSlideshow();
+    }
+  } catch (e) {
+    console.warn('Could not load media slots from server:', e);
+  }
 }
 
 function rebuildSlideshow() {
@@ -611,10 +761,6 @@ function nextSlide() {
   if (!nextVid) slideshowTimer = setInterval(nextSlide, SLIDE_DURATION);
 }
 
-// legacy single applyMedia / removeMedia kept for loadMedia compat
-function applyMedia(){rebuildSlideshow();}
-function removeMedia(){removeAllMedia();}
-
 // Admin open/close
 document.getElementById('adminTrigger').addEventListener('click',openAdmin);
 document.getElementById('adminClose').addEventListener('click',closeAdmin);
@@ -639,9 +785,30 @@ function toast(msg,type){
   setTimeout(()=>t.classList.remove('show'),2500);
 }
 
+// ── LIVE PRICE FETCH (metals.dev via PHP proxy) ──────────────────────────────
+async function fetchLivePrices() {
+  try {
+    const r = await fetch('/api/prices.php');
+    const d = await r.json();
+    if (d.success) {
+      spotUSD.gold   = d.gold;
+      spotUSD.silver = d.silver;
+      calcPrices();
+      renderRows(PRICES.gold,   'goldRows',   'gold');
+      renderRows(PRICES.silver, 'silverRows', 'silver');
+      // update header spot display
+      document.querySelector('.spot-val.gold-val') && (document.querySelector('.spot-val.gold-val').textContent = '$' + d.gold.toLocaleString('en',{minimumFractionDigits:2}));
+      updateAdminLivePrices();
+    }
+  } catch(e) {
+    console.warn('Price fetch failed, using last known price');
+  }
+}
+
+
 function nudge(v){return v*(1+(Math.random()-.5)*0.0003)}
 function updatePrices(){
-  // nudge spot slightly to simulate live (replaced by API on Monday)
+  // gentle nudge while waiting for next API fetch
   spotUSD.gold   = nudge(spotUSD.gold);
   spotUSD.silver = nudge(spotUSD.silver);
   calcPrices();
@@ -662,42 +829,15 @@ function updateClock(){
   document.getElementById('clock').textContent=n.toLocaleTimeString('en-AE',{hour12:false});
   document.getElementById('dateline').textContent=n.toLocaleDateString('en-AE',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
 }
-async function loadMedia(){
-  let cfg;
-  try{const r=await fetch('media.json');cfg=await r.json();}catch{return;}
-  const area=document.getElementById('mediaArea');
-  const slot=cfg.slots&&cfg.slots[0];
-  if(!slot){return;}
-  document.getElementById('noMedia').style.display='none';
-  let el;
-  if(slot.type==='video'){
-    el=document.createElement('video');
-    el.src=slot.src;el.autoplay=true;el.muted=true;el.loop=true;el.playsInline=true;
-    el.style.cssText='width:100%;height:100%;object-fit:cover';
-  }else if(slot.type==='image'){
-    el=document.createElement('img');
-    el.src=slot.src;el.alt=slot.label||'';
-    el.style.cssText='width:100%;height:100%;object-fit:cover';
-  }
-  if(el){
-    area.appendChild(el);
-    document.getElementById('mediaArea').classList.add('active');
-    if(slot.label){const lbl=document.createElement('div');lbl.className='media-lbl';lbl.textContent=slot.label;area.appendChild(lbl);}
-  }
-  if(cfg.sentiment){
-    const b=cfg.sentiment.buyers||65;
-    document.getElementById('sentBar').style.width=b+'%';
-    document.getElementById('sentBuyers').textContent='BUYERS '+b+'%';
-    document.getElementById('sentSellers').textContent='SELLERS '+(100-b)+'%';
-  }
-}
-
 calcPrices();
 renderRows(PRICES.gold,'goldRows','gold');
 renderRows(PRICES.silver,'silverRows','silver');
-updateClock();loadMedia();
+updateClock();
+loadServerMedia(); // load persisted media from server
+fetchLivePrices(); // fetch immediately on load
 setInterval(updateClock,1000);
 setInterval(updatePrices,3500);
+setInterval(fetchLivePrices, 5*60*1000); // refresh from API every 5 min
 </script>
 </body>
 </html>
