@@ -440,81 +440,148 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
         </div>
       </div>
 
-      <!-- BID / ASK — MASTER -->
+      <!-- BID / ASK — GOLD MASTER -->
       <div class="ap-section">
-        <div class="ap-section-title">&#9632; Gold — Master Offset (AED per gram)</div>
-        <div style="display:flex;gap:10px;margin-bottom:4px">
-          <div style="flex:1">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">BID (e.g. −5)</div>
-            <input type="number" class="spread-input" id="masterGoldBid" value="-5" step="0.5" style="width:100%">
+        <div class="ap-section-title">&#9632; Gold — Master Offset <span style="font-size:10px;color:var(--gold);font-weight:400">(AED per gram · based on 24K 999·1GM)</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px">
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">&#9660; BID offset</div>
+            <input type="number" class="spread-input" id="masterGoldBid" oninput="updateAdminPreviews()" value="-5" step="0.5" style="width:100%;font-size:15px;padding:10px 8px">
           </div>
-          <div style="flex:1">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">ASK (e.g. +5)</div>
-            <input type="number" class="spread-input" id="masterGoldAsk" value="5" step="0.5" style="width:100%">
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">&#9650; ASK offset</div>
+            <input type="number" class="spread-input" id="masterGoldAsk" oninput="updateAdminPreviews()" value="5" step="0.5" style="width:100%;font-size:15px;padding:10px 8px">
           </div>
         </div>
-        <div style="font-size:10px;color:var(--muted)">Auto-scales to all gold rows by weight &amp; purity</div>
+        <div style="font-size:10px;color:var(--muted);background:rgba(255,255,255,0.04);padding:6px 8px;border-radius:4px">
+          Set offset for 24K 999·1GM &nbsp;·&nbsp; auto-scales: 1KG=×1000 &nbsp;·&nbsp; 916GM=×0.916 &nbsp;·&nbsp; TTB=×116.64
+        </div>
       </div>
 
       <!-- GOLD ROW OVERRIDES -->
       <div class="ap-section">
-        <div class="ap-section-title">&#9632; Gold — Row Overrides (optional)</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:-4px">✔ Check a row to set custom BID/ASK for that row only</div>
-          ${['9999·1KG','995·1KG','916·1GM','999·1GM','1TB·1TTB'].map((lbl,i) => `
-          <div class="spread-row" style="align-items:center;gap:8px">
-            <input type="checkbox" id="ovr_gold_${i}" onchange="syncOverrideInputs('gold',${i})" style="accent-color:var(--gold);width:14px;height:14px">
-            <span class="spread-lbl" style="min-width:72px">${lbl}</span>
-            <div style="display:flex;gap:6px;flex:1">
-              <div style="flex:1">
-                <div style="font-size:9px;color:var(--muted)">BID</div>
-                <input type="number" class="spread-input" id="ovrBid_gold_${i}" value="0" step="0.5" disabled style="width:100%">
-              </div>
-              <div style="flex:1">
-                <div style="font-size:9px;color:var(--muted)">ASK</div>
-                <input type="number" class="spread-input" id="ovrAsk_gold_${i}" value="0" step="0.5" disabled style="width:100%">
-              </div>
+        <div class="ap-section-title">&#9632; Gold — Custom Row Override</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:10px">Tick a row to set its own BID / ASK instead of master</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+
+          <div style="display:grid;grid-template-columns:16px 80px 1fr 1fr;gap:8px;align-items:center;padding:8px;background:rgba(255,255,255,0.04);border-radius:6px">
+            <input type="checkbox" id="ovr_gold_0" onchange="syncOverrideInputs('gold',0);updateAdminPreviews()" style="accent-color:var(--gold)">
+            <span style="font-size:11px;font-weight:600;color:var(--gold)">9999·1KG</span>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">BID</div><input type="number" class="spread-input" id="ovrBid_gold_0" oninput="updateAdminPreviews()" value="0" step="100" disabled style="width:100%"></div>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">ASK</div><input type="number" class="spread-input" id="ovrAsk_gold_0" oninput="updateAdminPreviews()" value="0" step="100" disabled style="width:100%"></div>
+            <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:16px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.06);margin-top:2px">
+              <span style="font-size:10px;color:var(--muted)">BOARD PRICE →</span>
+              <span style="font-size:11px;font-weight:700;color:#4ade80" id="prev_buy_gold_0">—</span>
+              <span style="font-size:10px;color:var(--muted)">/</span>
+              <span style="font-size:11px;font-weight:700;color:#f87171" id="prev_sell_gold_0">—</span>
             </div>
-          </div>`).join('')}
+          </div>
+
+          <div style="display:grid;grid-template-columns:16px 80px 1fr 1fr;gap:8px;align-items:center;padding:8px;background:rgba(255,255,255,0.04);border-radius:6px">
+            <input type="checkbox" id="ovr_gold_1" onchange="syncOverrideInputs('gold',1);updateAdminPreviews()" style="accent-color:var(--gold)">
+            <span style="font-size:11px;font-weight:600;color:var(--gold)">995·1KG</span>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">BID</div><input type="number" class="spread-input" id="ovrBid_gold_1" oninput="updateAdminPreviews()" value="0" step="100" disabled style="width:100%"></div>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">ASK</div><input type="number" class="spread-input" id="ovrAsk_gold_1" oninput="updateAdminPreviews()" value="0" step="100" disabled style="width:100%"></div>
+            <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:16px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.06);margin-top:2px">
+              <span style="font-size:10px;color:var(--muted)">BOARD PRICE →</span>
+              <span style="font-size:11px;font-weight:700;color:#4ade80" id="prev_buy_gold_1">—</span>
+              <span style="font-size:10px;color:var(--muted)">/</span>
+              <span style="font-size:11px;font-weight:700;color:#f87171" id="prev_sell_gold_1">—</span>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:16px 80px 1fr 1fr;gap:8px;align-items:center;padding:8px;background:rgba(255,255,255,0.04);border-radius:6px">
+            <input type="checkbox" id="ovr_gold_2" onchange="syncOverrideInputs('gold',2);updateAdminPreviews()" style="accent-color:var(--gold)">
+            <span style="font-size:11px;font-weight:600;color:var(--gold)">916·1GM</span>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">BID</div><input type="number" class="spread-input" id="ovrBid_gold_2" oninput="updateAdminPreviews()" value="0" step="0.5" disabled style="width:100%"></div>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">ASK</div><input type="number" class="spread-input" id="ovrAsk_gold_2" oninput="updateAdminPreviews()" value="0" step="0.5" disabled style="width:100%"></div>
+            <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:16px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.06);margin-top:2px">
+              <span style="font-size:10px;color:var(--muted)">BOARD PRICE →</span>
+              <span style="font-size:11px;font-weight:700;color:#4ade80" id="prev_buy_gold_2">—</span>
+              <span style="font-size:10px;color:var(--muted)">/</span>
+              <span style="font-size:11px;font-weight:700;color:#f87171" id="prev_sell_gold_2">—</span>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:16px 80px 1fr 1fr;gap:8px;align-items:center;padding:8px;background:rgba(255,255,255,0.04);border-radius:6px">
+            <input type="checkbox" id="ovr_gold_3" onchange="syncOverrideInputs('gold',3);updateAdminPreviews()" style="accent-color:var(--gold)">
+            <span style="font-size:11px;font-weight:600;color:var(--gold)">999·1GM</span>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">BID</div><input type="number" class="spread-input" id="ovrBid_gold_3" oninput="updateAdminPreviews()" value="0" step="0.5" disabled style="width:100%"></div>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">ASK</div><input type="number" class="spread-input" id="ovrAsk_gold_3" oninput="updateAdminPreviews()" value="0" step="0.5" disabled style="width:100%"></div>
+            <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:16px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.06);margin-top:2px">
+              <span style="font-size:10px;color:var(--muted)">BOARD PRICE →</span>
+              <span style="font-size:11px;font-weight:700;color:#4ade80" id="prev_buy_gold_3">—</span>
+              <span style="font-size:10px;color:var(--muted)">/</span>
+              <span style="font-size:11px;font-weight:700;color:#f87171" id="prev_sell_gold_3">—</span>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:16px 80px 1fr 1fr;gap:8px;align-items:center;padding:8px;background:rgba(255,255,255,0.04);border-radius:6px">
+            <input type="checkbox" id="ovr_gold_4" onchange="syncOverrideInputs('gold',4);updateAdminPreviews()" style="accent-color:var(--gold)">
+            <span style="font-size:11px;font-weight:600;color:var(--gold)">1TB·TTB</span>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">BID</div><input type="number" class="spread-input" id="ovrBid_gold_4" oninput="updateAdminPreviews()" value="0" step="10" disabled style="width:100%"></div>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">ASK</div><input type="number" class="spread-input" id="ovrAsk_gold_4" oninput="updateAdminPreviews()" value="0" step="10" disabled style="width:100%"></div>
+            <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:16px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.06);margin-top:2px">
+              <span style="font-size:10px;color:var(--muted)">BOARD PRICE →</span>
+              <span style="font-size:11px;font-weight:700;color:#4ade80" id="prev_buy_gold_4">—</span>
+              <span style="font-size:10px;color:var(--muted)">/</span>
+              <span style="font-size:11px;font-weight:700;color:#f87171" id="prev_sell_gold_4">—</span>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- SILVER MASTER -->
+      <!-- BID / ASK — SILVER MASTER -->
       <div class="ap-section">
-        <div class="ap-section-title">&#9632; Silver — Master Offset (AED per gram)</div>
-        <div style="display:flex;gap:10px;margin-bottom:4px">
-          <div style="flex:1">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">BID (e.g. −0.5)</div>
-            <input type="number" class="spread-input" id="masterSilverBid" value="-0.5" step="0.1" style="width:100%">
+        <div class="ap-section-title">&#9632; Silver — Master Offset <span style="font-size:10px;color:var(--gold);font-weight:400">(AED per gram · 999 pure)</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px">
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">&#9660; BID offset</div>
+            <input type="number" class="spread-input" id="masterSilverBid" oninput="updateAdminPreviews()" value="-0.5" step="0.1" style="width:100%;font-size:15px;padding:10px 8px">
           </div>
-          <div style="flex:1">
-            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">ASK (e.g. +0.5)</div>
-            <input type="number" class="spread-input" id="masterSilverAsk" value="0.5" step="0.1" style="width:100%">
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">&#9650; ASK offset</div>
+            <input type="number" class="spread-input" id="masterSilverAsk" oninput="updateAdminPreviews()" value="0.5" step="0.1" style="width:100%;font-size:15px;padding:10px 8px">
           </div>
         </div>
-        <div style="font-size:10px;color:var(--muted)">Auto-scales to all silver rows by weight</div>
+        <div style="font-size:10px;color:var(--muted);background:rgba(255,255,255,0.04);padding:6px 8px;border-radius:4px">
+          Auto-scales to all rows &nbsp;·&nbsp; 1KG = ×1000 &nbsp;·&nbsp; TTB = ×116.64
+        </div>
       </div>
 
       <!-- SILVER ROW OVERRIDES -->
       <div class="ap-section">
-        <div class="ap-section-title">&#9632; Silver — Row Overrides (optional)</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:-4px">✔ Check a row to set custom BID/ASK for that row only</div>
-          ${['999·1KG','999·1TTB'].map((lbl,i) => `
-          <div class="spread-row" style="align-items:center;gap:8px">
-            <input type="checkbox" id="ovr_silver_${i}" onchange="syncOverrideInputs('silver',${i})" style="accent-color:var(--gold);width:14px;height:14px">
-            <span class="spread-lbl" style="min-width:72px">${lbl}</span>
-            <div style="display:flex;gap:6px;flex:1">
-              <div style="flex:1">
-                <div style="font-size:9px;color:var(--muted)">BID</div>
-                <input type="number" class="spread-input" id="ovrBid_silver_${i}" value="0" step="0.1" disabled style="width:100%">
-              </div>
-              <div style="flex:1">
-                <div style="font-size:9px;color:var(--muted)">ASK</div>
-                <input type="number" class="spread-input" id="ovrAsk_silver_${i}" value="0" step="0.1" disabled style="width:100%">
-              </div>
+        <div class="ap-section-title">&#9632; Silver — Custom Row Override</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:10px">Tick a row to set its own BID / ASK instead of master</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+
+          <div style="display:grid;grid-template-columns:16px 80px 1fr 1fr;gap:8px;align-items:center;padding:8px;background:rgba(255,255,255,0.04);border-radius:6px">
+            <input type="checkbox" id="ovr_silver_0" onchange="syncOverrideInputs('silver',0)" style="accent-color:var(--gold)">
+            <span style="font-size:11px;font-weight:600;color:var(--gold)">999·1KG</span>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">BID</div><input type="number" class="spread-input" id="ovrBid_silver_0" oninput="updateAdminPreviews()" value="0" step="10" disabled style="width:100%"></div>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">ASK</div><input type="number" class="spread-input" id="ovrAsk_silver_0" oninput="updateAdminPreviews()" value="0" step="10" disabled style="width:100%"></div>
+            <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:16px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.06);margin-top:2px">
+              <span style="font-size:10px;color:var(--muted)">BOARD PRICE →</span>
+              <span style="font-size:11px;font-weight:700;color:#4ade80" id="prev_buy_silver_0">—</span>
+              <span style="font-size:10px;color:var(--muted)">/</span>
+              <span style="font-size:11px;font-weight:700;color:#f87171" id="prev_sell_silver_0">—</span>
             </div>
-          </div>`).join('')}
+          </div>
+
+          <div style="display:grid;grid-template-columns:16px 80px 1fr 1fr;gap:8px;align-items:center;padding:8px;background:rgba(255,255,255,0.04);border-radius:6px">
+            <input type="checkbox" id="ovr_silver_1" onchange="syncOverrideInputs('silver',1)" style="accent-color:var(--gold)">
+            <span style="font-size:11px;font-weight:600;color:var(--gold)">999·TTB</span>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">BID</div><input type="number" class="spread-input" id="ovrBid_silver_1" oninput="updateAdminPreviews()" value="0" step="1" disabled style="width:100%"></div>
+            <div><div style="font-size:9px;color:var(--muted);margin-bottom:3px">ASK</div><input type="number" class="spread-input" id="ovrAsk_silver_1" oninput="updateAdminPreviews()" value="0" step="1" disabled style="width:100%"></div>
+            <div style="grid-column:1/-1;display:flex;justify-content:flex-end;gap:16px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.06);margin-top:2px">
+              <span style="font-size:10px;color:var(--muted)">BOARD PRICE →</span>
+              <span style="font-size:11px;font-weight:700;color:#4ade80" id="prev_buy_silver_1">—</span>
+              <span style="font-size:10px;color:var(--muted)">/</span>
+              <span style="font-size:11px;font-weight:700;color:#f87171" id="prev_sell_silver_1">—</span>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -607,6 +674,9 @@ const WEIGHT_GM = {
 };
 
 function applyMaster() {
+  // Master is set in AED per gram of 24K 999 gold.
+  // For each row: scale by weight (grams), then apply purity ratio vs 999 (=1.0 base).
+  // 9999=1.0, 995=0.995, 916=0.916, 999=0.999, 1TB=1.0 (fine gold tola)
   ['gold','silver'].forEach(type => {
     BID[type].forEach((_, i) => {
       if (OVERRIDE[type][i] !== null) {
@@ -614,7 +684,8 @@ function applyMaster() {
         ASK[type][i] = OVERRIDE[type][i].ask;
       } else {
         const wg = WEIGHT_GM[type][i];
-        const purity = (type === 'gold' && PURITY.gold[i]) ? PURITY.gold[i] : 1.0;
+        // Gold: scale by purity relative to 24K(999). Silver: no purity factor.
+        const purity = (type === 'gold') ? (PURITY.gold[i] || 1.0) : 1.0;
         BID[type][i] = MASTER[type+'Bid'] * wg * purity;
         ASK[type][i] = MASTER[type+'Ask'] * wg * purity;
       }
@@ -634,6 +705,40 @@ function calcPrices() {
     const mid = spotUSD.silver * WEIGHT.silver[i] * AED;
     item.buy  = mid + BID.silver[i];
     item.sell = mid + ASK.silver[i];
+  });
+}
+
+function updateAdminPreviews() {
+  // Temporarily apply master inputs to compute preview prices
+  const tmpMaster = {
+    goldBid:   parseFloat(document.getElementById('masterGoldBid').value)   || 0,
+    goldAsk:   parseFloat(document.getElementById('masterGoldAsk').value)   || 0,
+    silverBid: parseFloat(document.getElementById('masterSilverBid').value) || 0,
+    silverAsk: parseFloat(document.getElementById('masterSilverAsk').value) || 0,
+  };
+  const fmt2 = v => v.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+  [['gold',5],['silver',2]].forEach(([type, count]) => {
+    for (let i = 0; i < count; i++) {
+      const chk = document.getElementById('ovr_'+type+'_'+i);
+      const wt  = WEIGHT[type][i];
+      const wg  = WEIGHT_GM[type][i];
+      const pur = (type==='gold' && PURITY.gold[i]) ? PURITY.gold[i] : 1.0;
+      const spot = type==='gold' ? spotUSD.gold : spotUSD.silver;
+      const mid = spot * wt * AED * pur;
+      let bid, ask;
+      if (chk && chk.checked) {
+        bid = parseFloat(document.getElementById('ovrBid_'+type+'_'+i).value) || 0;
+        ask = parseFloat(document.getElementById('ovrAsk_'+type+'_'+i).value) || 0;
+      } else {
+        // Same logic as applyMaster: weight × purity
+        bid = tmpMaster[type+'Bid'] * wg * pur;
+        ask = tmpMaster[type+'Ask'] * wg * pur;
+      }
+      const buyEl  = document.getElementById('prev_buy_'+type+'_'+i);
+      const sellEl = document.getElementById('prev_sell_'+type+'_'+i);
+      if (buyEl)  buyEl.textContent  = fmt2(mid + bid);
+      if (sellEl) sellEl.textContent = fmt2(mid + ask);
+    }
   });
 }
 
@@ -856,6 +961,7 @@ document.getElementById('adminClose').addEventListener('click',closeAdmin);
 document.getElementById('adminOverlay').addEventListener('click',function(e){if(e.target===this)closeAdmin()});
 
 function openAdmin(){
+  setTimeout(updateAdminPreviews, 50);
   const pw=prompt('Enter admin password:');
   if(pw!=='admin2024'){toast('Wrong password','err');return;}
   updateAdminLivePrices();
