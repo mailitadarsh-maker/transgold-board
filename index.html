@@ -305,13 +305,13 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
   <div class="hdr-mid">
     <div class="spot-item">
       <span class="spot-lbl">Gold / USD &middot; oz</span>
-      <span class="spot-val" id="hGold">3,321.49</span>
+      <span class="spot-val" id="hGold">4,046.73</span>
       <span class="spot-chg up">&#9650; 0.68</span>
     </div>
     <div class="live-badge"><span class="dot"></span>LIVE</div>
     <div class="spot-item">
       <span class="spot-lbl">Silver / USD &middot; oz</span>
-      <span class="spot-val" id="hSilver">32.79</span>
+      <span class="spot-val" id="hSilver">58.08</span>
       <span class="spot-chg up">&#9650; 0.02</span>
     </div>
   </div>
@@ -572,7 +572,7 @@ const WEIGHT = {
 const AED = 3.6725; // USD→AED fixed rate (will come from API later)
 
 // Spot prices — will be replaced by API; fallback hardcoded
-let spotUSD = { gold: 3321.49, silver: 32.79 };
+let spotUSD = { gold: 4046.73, silver: 58.08 };
 
 function calcPrices() {
   PRICES.gold.forEach((item, i) => {
