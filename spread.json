@@ -1,0 +1,4 @@
+{
+  "master": { "goldBid": -5, "goldAsk": 5, "silverBid": -0.5, "silverAsk": 0.5 },
+  "override": { "gold": [null,null,null,null,null], "silver": [null,null] }
+}

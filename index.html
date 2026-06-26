@@ -886,7 +886,15 @@ function saveSpread() {
   calcPrices();
   renderRows(PRICES.gold,   'goldRows',   'gold');
   renderRows(PRICES.silver, 'silverRows', 'silver');
-  toast('✓ Saved — board updated');
+
+  // Persist to server so all devices sync
+  fetch('save_spread.php', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ master: MASTER, override: OVERRIDE })
+  }).then(r=>r.json()).then(d=>{
+    toast(d.ok ? '✓ Saved — all devices updated' : '⚠ Save failed');
+  }).catch(()=>toast('⚠ Could not reach server'));
   closeAdmin();
 }
 
@@ -1200,7 +1208,45 @@ renderRows(PRICES.gold,'goldRows','gold');
 renderRows(PRICES.silver,'silverRows','silver');
 updateClock();
 loadServerMedia(); // load persisted media from server
+// Load saved spread from server on init
+async function loadSpread() {
+  try {
+    const r = await fetch('spread.json?t='+Date.now());
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.master) {
+      MASTER.goldBid   = d.master.goldBid;
+      MASTER.goldAsk   = d.master.goldAsk;
+      MASTER.silverBid = d.master.silverBid;
+      MASTER.silverAsk = d.master.silverAsk;
+      document.getElementById('masterGoldBid').value   = d.master.goldBid;
+      document.getElementById('masterGoldAsk').value   = d.master.goldAsk;
+      document.getElementById('masterSilverBid').value = d.master.silverBid;
+      document.getElementById('masterSilverAsk').value = d.master.silverAsk;
+    }
+    if (d.override) {
+      ['gold','silver'].forEach(type => {
+        (d.override[type]||[]).forEach((ovr, i) => {
+          OVERRIDE[type][i] = ovr;
+          const chk = document.getElementById('ovr_'+type+'_'+i);
+          if (chk) {
+            chk.checked = !!ovr;
+            const bidEl = document.getElementById('ovrBid_'+type+'_'+i);
+            const askEl = document.getElementById('ovrAsk_'+type+'_'+i);
+            if (ovr && bidEl) { bidEl.value = ovr.bid; bidEl.disabled = false; }
+            if (ovr && askEl) { askEl.value = ovr.ask; askEl.disabled = false; }
+          }
+        });
+      });
+    }
+    calcPrices();
+    renderRows(PRICES.gold,   'goldRows',   'gold');
+    renderRows(PRICES.silver, 'silverRows', 'silver');
+  } catch(e) { console.warn('Could not load spread.json', e); }
+}
+
 fetchLivePrices(); // fetch immediately on load
+loadSpread();      // load saved spread from server
 setInterval(updateClock,1000);
 setInterval(updatePrices,3500);
 setInterval(fetchLivePrices, 30*1000); // refresh every 30s
