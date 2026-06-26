@@ -790,7 +790,7 @@ async function fetchLivePrices() {
   try {
     const r = await fetch('/api/prices.php');
     const d = await r.json();
-    if (d.success) {
+    if (d.ok && d.gold) {
       spotUSD.gold   = d.gold;
       spotUSD.silver = d.silver;
       calcPrices();
@@ -837,7 +837,7 @@ loadServerMedia(); // load persisted media from server
 fetchLivePrices(); // fetch immediately on load
 setInterval(updateClock,1000);
 setInterval(updatePrices,3500);
-setInterval(fetchLivePrices, 5*60*1000); // refresh from API every 5 min
+setInterval(fetchLivePrices, 30*1000); // refresh every 30s
 </script>
 </body>
 </html>
