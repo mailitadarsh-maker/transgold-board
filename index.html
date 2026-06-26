@@ -1136,10 +1136,13 @@ async function fetchLivePrices() {
       const bgs = document.getElementById('bGoldSell');
       const bs = document.getElementById('bSilverBuy');
       const bss = document.getElementById('bSilverSell');
-      if (bg)  { bg.textContent  = d.gold.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); flash(bg); }
-      if (bgs) { bgs.textContent = (d.gold+1).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); flash(bgs); }
-      if (bs)  { bs.textContent  = d.silver.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); flash(bs); }
-      if (bss) { bss.textContent = (d.silver+0.03).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); flash(bss); }
+      // Sidebar uses PRICES[] which already has real BUY/SELL from calcPrices()
+      const g999idx = 3; // Gold 999·1GM row index
+      const s999idx = 0; // Silver 999·1KG row index
+      if (bg)  { bg.textContent  = fmt(PRICES.gold[g999idx].buy);  flash(bg); }
+      if (bgs) { bgs.textContent = fmt(PRICES.gold[g999idx].sell); flash(bgs); }
+      if (bs)  { bs.textContent  = fmt(PRICES.silver[s999idx].buy);  flash(bs); }
+      if (bss) { bss.textContent = fmt(PRICES.silver[s999idx].sell); flash(bss); }
       if (hg)  flash(hg);
       if (hs)  flash(hs);
     }
