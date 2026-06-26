@@ -840,7 +840,10 @@ async function fetchLivePrices() {
 
 
 function nudge(v){return v*(1+(Math.random()-.5)*0.0003)}
+function flashEl(el){if(!el)return;el.style.transition='background 0.05s';el.style.background='rgba(212,169,74,0.5)';setTimeout(function(){el.style.transition='background 0.3s';el.style.background='';},150);}
 function updatePrices(){
+  ['hGold','hSilver','bGoldBuy','bGoldSell','bSilverBuy','bSilverSell'].forEach(function(id){flashEl(document.getElementById(id));});
+  document.querySelectorAll('.buy-price,.sell-price').forEach(function(el){flashEl(el);});
   // gentle nudge while waiting for next API fetch
   spotUSD.gold   = nudge(spotUSD.gold);
   spotUSD.silver = nudge(spotUSD.silver);
