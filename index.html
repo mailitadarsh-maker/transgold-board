@@ -1129,6 +1129,11 @@ async function fetchLivePrices() {
         hs.nextElementSibling.textContent = (up ? String.fromCharCode(9650) : String.fromCharCode(9660)) + ' ' + Math.abs(sDiff);
         hs.nextElementSibling.className = 'spot-chg ' + (up ? 'up' : 'down');
       }
+      // Sync sidebar chg-line with same diff
+      const bgc = document.getElementById('bGoldChg');
+      const bsc = document.getElementById('bSilverChg');
+      if (bgc) { const up = parseFloat(gDiff)>=0; bgc.textContent=(up?'▲':'▼')+' '+Math.abs(gDiff); bgc.className='chg-line '+(up?'up':'down'); }
+      if (bsc) { const up = parseFloat(sDiff)>=0; bsc.textContent=(up?'▲':'▼')+' '+Math.abs(sDiff); bsc.className='chg-line '+(up?'up':'down'); }
       updateAdminLivePrices();
       // update right panel boxes with flash effect
       const flash = el => { el.style.transition='background 0.1s'; el.style.background='rgba(212,169,74,0.6)'; setTimeout(()=>{el.style.transition='background 0.6s';el.style.background='';},300); };
