@@ -528,14 +528,15 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
 <script>
 const PRICES={
   gold:[
-    {purity:'9999',weight:'1 KG', buy:387219.08,sell:400219.08},
-    {purity:'995', weight:'1 KG', buy:386297.01,sell:397297.01},
-    {purity:'916', weight:'1 GM', buy:356.31,   sell:364.31},
-    {purity:'1TB', weight:'1 TTB',buy:45165.23, sell:46681.55},
+    {purity:'9999',weight:'1 KG', buy:0,sell:0},
+    {purity:'995', weight:'1 KG', buy:0,sell:0},
+    {purity:'916', weight:'1 GM', buy:0,sell:0},
+    {purity:'999', weight:'1 GM', buy:0,sell:0},
+    {purity:'1TB', weight:'1 TTB',buy:0,sell:0},
   ],
   silver:[
-    {purity:'999',weight:'1 KG', buy:3369.89,sell:4669.89},
-    {purity:'999',weight:'1 TTB',buy:393.06,  sell:544.70},
+    {purity:'999',weight:'1 KG', buy:0,sell:0},
+    {purity:'999',weight:'1 TTB',buy:0,sell:0},
   ]
 };
 
@@ -554,16 +555,19 @@ function renderRows(items,id,type){
 
 // ── SPREAD CONFIG (per row, in AED) ─────────────────────────────────────────
 // buy = midprice - spread/2 | sell = midprice + spread/2
+const PURITY = {
+  gold: [1.0, 0.995, 0.916, 0.999, 1.0]
+};
 let SPREAD = {
-  gold:   [13000, 11000, 8, 1516],
+  gold:   [13000, 11000, 8, 8, 1516],
   silver: [1300, 151]
 };
 
 // Weight multipliers: how many troy oz per unit
 // 1 troy oz = 31.1035g
 const WEIGHT = {
-  gold:   [32.1507, 32.1507, 0.032151, 3.7500], // 1KG, 1KG, 1GM, 1TTB
-  silver: [32.1507, 3.7500]                       // 1KG, 1TTB
+  gold:   [32.1507, 32.1507, 0.032151, 0.032151, 3.7500], // 9999·1KG, 995·1KG, 916·1GM, 999·1GM, 1TB·TTB
+  silver: [32.1507, 3.7500]                                 // 1KG, 1TTB
 };
 const AED = 3.6725; // USD→AED fixed rate (will come from API later)
 
@@ -572,7 +576,8 @@ let spotUSD = { gold: 3321.49, silver: 32.79 };
 
 function calcPrices() {
   PRICES.gold.forEach((item, i) => {
-    const mid = spotUSD.gold * WEIGHT.gold[i] * AED;
+    const purity = PURITY.gold[i] !== undefined ? PURITY.gold[i] : 1.0;
+    const mid = spotUSD.gold * WEIGHT.gold[i] * AED * purity;
     item.buy  = mid - SPREAD.gold[i] / 2;
     item.sell = mid + SPREAD.gold[i] / 2;
   });
@@ -584,7 +589,7 @@ function calcPrices() {
 }
 
 function saveSpread() {
-  SPREAD.gold   = [0,1,2,3].map(i => parseFloat(document.getElementById('spGold'+i).value)   || 0);
+  SPREAD.gold   = [0,1,2,3,4].map(i => parseFloat(document.getElementById('spGold'+i).value)   || 0);
   SPREAD.silver = [0,1].map(i   => parseFloat(document.getElementById('spSilver'+i).value) || 0);
   calcPrices();
   renderRows(PRICES.gold,   'goldRows',   'gold');
