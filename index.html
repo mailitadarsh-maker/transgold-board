@@ -495,6 +495,32 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
         </div>
       </div>
 
+      <!-- GOLD LIVE SUMMARY TABLE -->
+      <div class="ap-section">
+        <div class="ap-section-title">&#9632; Gold — Live Breakdown (auto from master)</div>
+        <div style="display:flex;flex-direction:column;gap:4px;font-size:11px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:4px 6px;color:var(--muted);font-size:9px;letter-spacing:.05em">
+            <span>ROW</span><span style="text-align:right">SELL (BID)</span><span style="text-align:right">BUY (ASK)</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:5px 6px;background:rgba(255,255,255,0.03);border-radius:4px">
+            <span>9999·1KG</span><span style="text-align:right;color:#f87171" id="sum_bid_gold_0">—</span><span style="text-align:right;color:#4ade80" id="sum_ask_gold_0">—</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:5px 6px;background:rgba(255,255,255,0.03);border-radius:4px">
+            <span>995·1KG</span><span style="text-align:right;color:#f87171" id="sum_bid_gold_1">—</span><span style="text-align:right;color:#4ade80" id="sum_ask_gold_1">—</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:5px 6px;background:rgba(255,255,255,0.03);border-radius:4px">
+            <span>916·1GM</span><span style="text-align:right;color:#f87171" id="sum_bid_gold_2">—</span><span style="text-align:right;color:#4ade80" id="sum_ask_gold_2">—</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:5px 6px;background:rgba(255,255,255,0.03);border-radius:4px">
+            <span>999·1GM</span><span style="text-align:right;color:#f87171" id="sum_bid_gold_3">—</span><span style="text-align:right;color:#4ade80" id="sum_ask_gold_3">—</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:5px 6px;background:rgba(255,255,255,0.03);border-radius:4px">
+            <span>1TB·TTB</span><span style="text-align:right;color:#f87171" id="sum_bid_gold_4">—</span><span style="text-align:right;color:#4ade80" id="sum_ask_gold_4">—</span>
+          </div>
+        </div>
+        <div style="font-size:9px;color:var(--muted);margin-top:6px">Rows with a custom override (checked below) show their own value here too</div>
+      </div>
+
       <!-- GOLD ROW OVERRIDES -->
       <div class="ap-section">
         <div class="ap-section-title">&#9632; Gold — Custom Row Override</div>
@@ -585,6 +611,23 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
         <div style="font-size:10px;color:var(--muted);background:rgba(255,255,255,0.04);padding:6px 8px;border-radius:4px">
           Auto-scales to all rows &nbsp;·&nbsp; 1KG = ×1000 &nbsp;·&nbsp; TTB = ×116.64
         </div>
+      </div>
+
+      <!-- SILVER LIVE SUMMARY TABLE -->
+      <div class="ap-section">
+        <div class="ap-section-title">&#9632; Silver — Live Breakdown (auto from master)</div>
+        <div style="display:flex;flex-direction:column;gap:4px;font-size:11px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:4px 6px;color:var(--muted);font-size:9px;letter-spacing:.05em">
+            <span>ROW</span><span style="text-align:right">SELL (BID)</span><span style="text-align:right">BUY (ASK)</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:5px 6px;background:rgba(255,255,255,0.03);border-radius:4px">
+            <span>999·1KG</span><span style="text-align:right;color:#f87171" id="sum_bid_silver_0">—</span><span style="text-align:right;color:#4ade80" id="sum_ask_silver_0">—</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:5px 6px;background:rgba(255,255,255,0.03);border-radius:4px">
+            <span>999·TTB</span><span style="text-align:right;color:#f87171" id="sum_bid_silver_1">—</span><span style="text-align:right;color:#4ade80" id="sum_ask_silver_1">—</span>
+          </div>
+        </div>
+        <div style="font-size:9px;color:var(--muted);margin-top:6px">Rows with a custom override (checked below) show their own value here too</div>
       </div>
 
       <!-- SILVER ROW OVERRIDES -->
@@ -746,6 +789,18 @@ function calcPrices() {
 }
 
 function updateAdminPreviews() {
+  // Update live breakdown summary tables (Gold + Silver)
+  ['gold','silver'].forEach(type => {
+    const count = type === 'gold' ? 5 : 2;
+    for (let i = 0; i < count; i++) {
+      applyMaster();
+      const bidEl = document.getElementById('sum_bid_'+type+'_'+i);
+      const askEl = document.getElementById('sum_ask_'+type+'_'+i);
+      if (bidEl) bidEl.textContent = BID[type][i].toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if (askEl) askEl.textContent = ('+'+ASK[type][i].toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})).replace('+-','-');
+    }
+  });
+
   // Temporarily apply master inputs to compute preview prices
   const tmpMaster = {
     goldBid:   parseFloat(document.getElementById('masterGoldBid').value)   || 0,
