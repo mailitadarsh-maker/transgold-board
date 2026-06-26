@@ -820,15 +820,20 @@ async function fetchLivePrices() {
         hs.nextElementSibling.className = 'spot-chg ' + (up ? 'up' : 'down');
       }
       updateAdminLivePrices();
-      // update right panel boxes
+      // update right panel boxes with flash effect
+      const flash = el => { el.style.transition='background 0.2s'; el.style.background='rgba(212,169,74,0.3)'; setTimeout(()=>el.style.background='',500); };
       const bg = document.getElementById('bGoldBuy');
       const bgs = document.getElementById('bGoldSell');
       const bs = document.getElementById('bSilverBuy');
       const bss = document.getElementById('bSilverSell');
-      if (bg)  bg.textContent  = d.gold.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
-      if (bgs) bgs.textContent = (d.gold+1).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
-      if (bs)  bs.textContent  = d.silver.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
-      if (bss) bss.textContent = (d.silver+0.03).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      const hg = document.getElementById('hGold');
+      const hs = document.getElementById('hSilver');
+      if (bg)  { bg.textContent  = d.gold.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); flash(bg); }
+      if (bgs) { bgs.textContent = (d.gold+1).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); flash(bgs); }
+      if (bs)  { bs.textContent  = d.silver.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); flash(bs); }
+      if (bss) { bss.textContent = (d.silver+0.03).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); flash(bss); }
+      if (hg)  flash(hg);
+      if (hs)  flash(hs);
     }
   } catch(e) {
     console.warn('Price fetch failed, using last known price');
