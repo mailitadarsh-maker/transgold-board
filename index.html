@@ -821,7 +821,7 @@ async function fetchLivePrices() {
       }
       updateAdminLivePrices();
       // update right panel boxes with flash effect
-      const flash = el => { el.style.transition='background 0.2s'; el.style.background='rgba(212,169,74,0.3)'; setTimeout(()=>el.style.background='',500); };
+      const flash = el => { el.style.transition='background 0.1s'; el.style.background='rgba(212,169,74,0.6)'; setTimeout(()=>{el.style.transition='background 0.6s';el.style.background='';},300); };
       const bg = document.getElementById('bGoldBuy');
       const bgs = document.getElementById('bGoldSell');
       const bs = document.getElementById('bSilverBuy');
@@ -872,7 +872,7 @@ loadServerMedia(); // load persisted media from server
 fetchLivePrices(); // fetch immediately on load
 setInterval(updateClock,1000);
 setInterval(updatePrices,3500);
-setInterval(fetchLivePrices, 30*1000); // refresh every 30s
+setInterval(fetchLivePrices, 5*1000); // refresh every 5s
 </script>
 </body>
 </html>
