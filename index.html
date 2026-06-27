@@ -122,6 +122,13 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
 }
 .admin-panel::-webkit-scrollbar{width:4px}
 .admin-panel::-webkit-scrollbar-thumb{background:rgba(212,169,74,.2);border-radius:2px}
+.ap-tabs{display:flex;gap:4px;padding:12px 16px 0;border-bottom:1px solid rgba(212,169,74,.12);background:#0d0d0d;}
+.ap-tab{padding:8px 16px;font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--muted);cursor:pointer;border-radius:6px 6px 0 0;border:1px solid transparent;border-bottom:none;transition:all .2s;}
+.ap-tab:hover{color:var(--gold);}
+.ap-tab.active{color:var(--gold);background:#141414;border-color:rgba(212,169,74,.2);}
+.ap-tab-content{display:none;}
+.ap-tab-content.active{display:block;}
+
 .ap-hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(212,169,74,.15)}
 .ap-title{font-size:16px;font-weight:700;letter-spacing:.1em;color:var(--gold);text-transform:uppercase}
 .ap-close{background:none;border:1px solid rgba(255,255,255,.1);color:var(--muted);font-size:18px;width:32px;height:32px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
@@ -420,8 +427,13 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
       <div class="ap-title">&#9881; Admin Panel</div>
       <button class="ap-close" id="adminClose">&#10005;</button>
     </div>
+    <div style="display:flex;gap:4px;padding:12px 16px 0;border-bottom:1px solid rgba(212,169,74,.12);background:#0d0d0d;">
+      <div class="ap-tab active" onclick="switchTab('prices')">PRICES</div>
+      <div class="ap-tab" onclick="switchTab('shop')">SHOP INFO</div>
+      <div class="ap-tab" onclick="switchTab('media')">MEDIA</div>
+    </div>
     <div class="ap-body">
-
+      <div id="tab-prices" class="ap-tab-content active">
       <!-- LIVE PRICE STATUS -->
       <div class="ap-section">
         <div class="ap-section-title">&#9632; Live Price Feed</div>
@@ -682,6 +694,8 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
       </div>
 
       <!-- SAVE BUTTON -->
+      </div><!-- end tab-prices -->
+      <div id="tab-shop" class="ap-tab-content">
       <div class="ap-section">
         <div class="ap-section-title">&#9632; Shop Info — Contact Details</div>
         <div style="display:flex;flex-direction:column;gap:10px">
@@ -733,6 +747,8 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
       </div>
 
       <!-- MEDIA -->
+      </div><!-- end tab-shop -->
+      <div id="tab-media" class="ap-tab-content">
       <div class="ap-section">
         <div class="ap-section-title">&#9632; Media Slots (up to 3)</div>
         <div style="display:flex;flex-direction:column;gap:10px" id="mediaSlots"></div>
@@ -1340,6 +1356,14 @@ fetchLivePrices(); // fetch immediately on load
   setInterval(nextTarget, 7000); // phase shift every 7s
   setInterval(tick, 100);        // update every 100ms for smooth feel
 })();
+
+function switchTab(name) {
+  document.querySelectorAll('.ap-tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ap-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
 loadSpread();      // load saved spread from server
 async function loadShopInfo() {
   try {
