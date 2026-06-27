@@ -1,0 +1,13 @@
+{
+  "name": "Transgold Markets",
+  "tagline": "Your Trusted Gold & Silver Trading Partner in UAE",
+  "whatsapp": "+971500000000",
+  "phone": "+97140000000",
+  "email": "info@transgoldmarkets.com",
+  "address": "Gold Souk, Deira, Dubai, UAE",
+  "mapsUrl": "https://maps.google.com/?q=Gold+Souk+Deira+Dubai",
+  "hours": [
+    { "day": "Monday – Saturday", "time": "9:00 AM – 9:00 PM" },
+    { "day": "Sunday", "time": "10:00 AM – 6:00 PM" }
+  ]
+}
