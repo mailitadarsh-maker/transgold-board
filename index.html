@@ -682,6 +682,52 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
       </div>
 
       <!-- SAVE BUTTON -->
+      <div class="ap-section">
+        <div class="ap-section-title">&#9632; Shop Info — Contact Details</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px">SHOP NAME</div>
+            <input class="ap-input" id="shopName" placeholder="Transgold Markets" />
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px">TAGLINE</div>
+            <input class="ap-input" id="shopTagline" placeholder="Your Trusted Gold & Silver Trading Partner" />
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px">WHATSAPP (with +971)</div>
+            <input class="ap-input" id="shopWhatsapp" placeholder="+971500000000" />
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px">PHONE</div>
+            <input class="ap-input" id="shopPhone" placeholder="+97140000000" />
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px">EMAIL</div>
+            <input class="ap-input" id="shopEmail" placeholder="info@transgoldmarkets.com" />
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px">ADDRESS</div>
+            <input class="ap-input" id="shopAddress" placeholder="Gold Souk, Deira, Dubai, UAE" />
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px">GOOGLE MAPS URL</div>
+            <input class="ap-input" id="shopMaps" placeholder="https://maps.google.com/..." />
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px">TRADING HOURS — ROW 1</div>
+            <input class="ap-input" id="shopHours1Day" placeholder="Monday - Saturday" style="margin-bottom:6px" />
+            <input class="ap-input" id="shopHours1Time" placeholder="9:00 AM - 9:00 PM" />
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px">TRADING HOURS — ROW 2</div>
+            <input class="ap-input" id="shopHours2Day" placeholder="Sunday" style="margin-bottom:6px" />
+            <input class="ap-input" id="shopHours2Time" placeholder="10:00 AM - 6:00 PM" />
+          </div>
+          <button class="ap-btn ap-btn-primary" style="width:100%;padding:12px;font-size:12px;margin-top:6px" onclick="saveShopInfo()">&#10003; SAVE SHOP INFO</button>
+          <div id="shopSaveMsg" style="font-size:11px;color:var(--green);text-align:center;display:none">Saved successfully!</div>
+        </div>
+      </div>
+
       <div class="ap-section" style="border:none">
         <button class="ap-btn ap-btn-primary" style="width:100%;padding:14px;font-size:13px" onclick="saveSpread()">&#10003; SAVE &amp; APPLY TO BOARD</button>
       </div>
@@ -1295,6 +1341,59 @@ fetchLivePrices(); // fetch immediately on load
   setInterval(tick, 100);        // update every 100ms for smooth feel
 })();
 loadSpread();      // load saved spread from server
+async function loadShopInfo() {
+  try {
+    const r = await fetch('/api/shop.php');
+    const d = await r.json();
+    document.getElementById('shopName').value = d.name || '';
+    document.getElementById('shopTagline').value = d.tagline || '';
+    document.getElementById('shopWhatsapp').value = d.whatsapp || '';
+    document.getElementById('shopPhone').value = d.phone || '';
+    document.getElementById('shopEmail').value = d.email || '';
+    document.getElementById('shopAddress').value = d.address || '';
+    document.getElementById('shopMaps').value = d.mapsUrl || '';
+    if (d.hours && d.hours[0]) {
+      document.getElementById('shopHours1Day').value = d.hours[0].day || '';
+      document.getElementById('shopHours1Time').value = d.hours[0].time || '';
+    }
+    if (d.hours && d.hours[1]) {
+      document.getElementById('shopHours2Day').value = d.hours[1].day || '';
+      document.getElementById('shopHours2Time').value = d.hours[1].time || '';
+    }
+  } catch(e) { console.log('Could not load shop info', e); }
+}
+
+async function saveShopInfo() {
+  const data = {
+    name: document.getElementById('shopName').value,
+    tagline: document.getElementById('shopTagline').value,
+    whatsapp: document.getElementById('shopWhatsapp').value,
+    phone: document.getElementById('shopPhone').value,
+    email: document.getElementById('shopEmail').value,
+    address: document.getElementById('shopAddress').value,
+    mapsUrl: document.getElementById('shopMaps').value,
+    hours: [
+      { day: document.getElementById('shopHours1Day').value, time: document.getElementById('shopHours1Time').value },
+      { day: document.getElementById('shopHours2Day').value, time: document.getElementById('shopHours2Time').value }
+    ]
+  };
+  try {
+    const r = await fetch('/api/shop.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const res = await r.json();
+    if (res.success) {
+      const msg = document.getElementById('shopSaveMsg');
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 3000);
+    }
+  } catch(e) { alert('Save failed: ' + e); }
+}
+
+loadShopInfo();
+
 setInterval(updateClock,1000);
 setInterval(updatePrices,3500);
 setInterval(fetchLivePrices, 30*1000); // refresh every 30s
