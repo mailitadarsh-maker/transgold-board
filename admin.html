@@ -228,14 +228,20 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <div class="page active" id="page-dashboard">
         <div class="price-bar">
           <div class="price-box">
-            <div class="price-box-lbl">Gold (XAU/USD) — Arakkal</div>
+            <div class="price-box-lbl">Gold (XAU/USD) — Raw Arakkal</div>
             <div class="price-box-val" id="db-gold">—</div>
-            <div class="price-box-sub" id="db-gold-spread">With spread: —</div>
+            <div class="price-box-sub" id="db-gold-raw" style="color:var(--muted)">Raw price</div>
+            <div style="margin-top:8px;font-size:9px;color:var(--muted);letter-spacing:.1em">WITH SPREAD</div>
+            <div style="font-size:20px;font-weight:800;color:#22C55E;margin-top:2px" id="db-gold-spread">—</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:2px">USD / OZ</div>
           </div>
           <div class="price-box">
-            <div class="price-box-lbl">Silver (XAG/USD) — Arakkal</div>
+            <div class="price-box-lbl">Silver (XAG/USD) — Raw Arakkal</div>
             <div class="price-box-val" id="db-silver">—</div>
-            <div class="price-box-sub" id="db-silver-spread">With spread: —</div>
+            <div class="price-box-sub" id="db-silver-raw" style="color:var(--muted)">Raw price</div>
+            <div style="margin-top:8px;font-size:9px;color:var(--muted);letter-spacing:.1em">WITH SPREAD</div>
+            <div style="font-size:20px;font-weight:800;color:#22C55E;margin-top:2px" id="db-silver-spread">—</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:2px">USD / OZ</div>
           </div>
         </div>
         <div class="stat-grid">
@@ -638,8 +644,8 @@ function updateDashboard(){
   // spread-adjusted
   const gSpread = spotUSD.gold   + (MASTER.goldAsk   * WEIGHT_GM.gold[0])   / (WEIGHT_OZ.gold[0]   * AED * PURITY.gold[0]);
   const sSpread = spotUSD.silver + (MASTER.silverAsk  * WEIGHT_GM.silver[0]) / (WEIGHT_OZ.silver[0] * AED);
-  if(el('db-gold-spread'))   el('db-gold-spread').textContent   = 'With spread: $'+gSpread.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' USD/oz';
-  if(el('db-silver-spread')) el('db-silver-spread').textContent = 'With spread: $'+sSpread.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' USD/oz';
+  if(el('db-gold-spread'))   el('db-gold-spread').textContent   = '$'+gSpread.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(el('db-silver-spread')) el('db-silver-spread').textContent = '$'+sSpread.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
   // 999·1GM gold board price
   const {bid:gb,ask:ga} = getBidAsk('gold',3);
   const gp = calcPrice('gold',3,gb,ga);
