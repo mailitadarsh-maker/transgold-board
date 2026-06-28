@@ -3,17 +3,10 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Cache-Control: no-store');
 
-$url = 'https://raw.githubusercontent.com/mailitadarsh-maker/transgold-board/main/prices.json';
+$pricesFile = __DIR__ . '/../prices.json';
+$data = file_exists($pricesFile) ? file_get_contents($pricesFile) : null;
 
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-$data = curl_exec($ch);
-$err  = curl_error($ch);
-curl_close($ch);
-
-if ($data && !$err) {
+if ($data) {
     $json = json_decode($data, true);
 
     $spreadFile = __DIR__ . '/../spread.json';
