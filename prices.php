@@ -16,7 +16,6 @@ curl_close($ch);
 if ($data && !$err) {
     $json = json_decode($data, true);
 
-    // Read spread.json saved by admin dashboard
     $spreadFile = __DIR__ . '/spread.json';
     if (file_exists($spreadFile)) {
         $spread = json_decode(file_get_contents($spreadFile), true);
