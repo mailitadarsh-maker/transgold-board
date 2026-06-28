@@ -19,11 +19,12 @@ if ($data && !$err) {
     $spreadFile = __DIR__ . '/spread.json';
     if (file_exists($spreadFile)) {
         $spread = json_decode(file_get_contents($spreadFile), true);
+        $master = $spread['master'] ?? $spread;
         $json['spread'] = [
-            'goldBid'   => $spread['goldBid']   ?? 0,
-            'goldAsk'   => $spread['goldAsk']   ?? 0,
-            'silverBid' => $spread['silverBid'] ?? 0,
-            'silverAsk' => $spread['silverAsk'] ?? 0,
+            'goldBid'   => $master['goldBid']   ?? 0,
+            'goldAsk'   => $master['goldAsk']   ?? 0,
+            'silverBid' => $master['silverBid'] ?? 0,
+            'silverAsk' => $master['silverAsk'] ?? 0,
         ];
     } else {
         $json['spread'] = ['goldBid'=>0,'goldAsk'=>0,'silverBid'=>0,'silverAsk'=>0];
