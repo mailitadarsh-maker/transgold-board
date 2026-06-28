@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transgold Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#D4A94A;--gold-dim:#8A6A1F;
+  --bg:#090909;--bg2:#0F0F0F;--bg3:#161616;--bg4:#1C1C1C;
+  --green:#22C55E;--red:#EF4444;--silver:#B0BAC8;
+  --border:rgba(255,255,255,0.07);
+  --border-gold:rgba(212,169,74,0.2);
+  --text:#F0EBE0;--muted:#6B6660;
+  --sidebar:220px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,system-ui,sans-serif}
+
+/* ── AUTH SCREEN ── */
+#authScreen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.auth-box{width:360px;background:var(--bg2);border:1px solid var(--border-gold);border-radius:16px;padding:40px 32px;text-align:center}
+.auth-logo{font-size:28px;font-weight:800;letter-spacing:.12em;color:var(--gold);margin-bottom:4px}
+.auth-sub{font-size:10px;letter-spacing:.25em;color:var(--muted);text-transform:uppercase;margin-bottom:32px}
+.auth-label{font-size:10px;letter-spacing:.15em;color:var(--muted);text-align:left;margin-bottom:6px;text-transform:uppercase}
+.auth-input{width:100%;background:#0a0a0a;border:1px solid var(--border);color:var(--text);font-size:14px;padding:12px 14px;border-radius:8px;outline:none;margin-bottom:16px;transition:border-color .2s}
+.auth-input:focus{border-color:rgba(212,169,74,.5)}
+.auth-btn{width:100%;background:var(--gold);color:#000;font-size:12px;font-weight:800;letter-spacing:.1em;padding:13px;border:none;border-radius:8px;cursor:pointer;transition:background .2s}
+.auth-btn:hover{background:#e8b84b}
+.auth-err{color:var(--red);font-size:11px;margin-top:12px;display:none}
+
+/* ── APP SHELL ── */
+#app{display:none;height:100vh;flex-direction:row}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.sb-brand{padding:20px 16px 16px;border-bottom:1px solid var(--border)}
+.sb-logo{font-size:16px;font-weight:800;letter-spacing:.1em;color:var(--gold)}
+.sb-sub{font-size:8px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.sb-section{padding:8px 10px 4px;font-size:8px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-top:8px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 14px;margin:1px 6px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);transition:all .15s;position:relative}
+.sb-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.sb-item.active{background:rgba(212,169,74,.1);color:var(--gold);border:1px solid rgba(212,169,74,.15)}
+.sb-item svg{width:15px;height:15px;flex-shrink:0}
+.sb-badge{margin-left:auto;background:rgba(239,68,68,.8);color:#fff;font-size:8px;font-weight:800;padding:2px 6px;border-radius:8px;display:none}
+.sb-footer{margin-top:auto;padding:14px;border-top:1px solid var(--border)}
+.sb-user{font-size:10px;color:var(--muted);letter-spacing:.06em}
+.sb-logout{font-size:10px;color:var(--red);cursor:pointer;margin-top:4px;letter-spacing:.06em}
+.sb-logout:hover{text-decoration:underline}
+
+/* ── MAIN CONTENT ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:54px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.topbar-title{font-size:14px;font-weight:700;color:var(--text);letter-spacing:.04em}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.live-pill{display:flex;align-items:center;gap:6px;font-size:9px;font-weight:800;letter-spacing:.15em;color:var(--green);padding:5px 12px;border:1px solid rgba(34,197,94,.3);border-radius:20px;background:rgba(34,197,94,.06)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.8s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.topbar-time{font-size:12px;font-weight:700;color:var(--muted)}
+
+.content{flex:1;overflow-y:auto;padding:24px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+/* hide/show pages */
+.page{display:none}
+.page.active{display:block}
+
+/* ── CARDS / SECTIONS ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px}
+.card-title{font-size:9px;letter-spacing:.2em;font-weight:700;text-transform:uppercase;color:var(--gold);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border-gold);display:flex;align-items:center;gap:8px}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.stat-val{font-size:22px;font-weight:800;margin-bottom:2px}
+.stat-lbl{font-size:8px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase}
+
+/* price overview bar */
+.price-bar{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.price-box{background:var(--bg3);border:1px solid var(--border-gold);border-radius:8px;padding:14px 18px}
+.price-box-lbl{font-size:8px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.price-box-val{font-size:22px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.price-box-sub{font-size:9px;color:var(--muted);margin-top:3px}
+
+/* spread inputs */
+.spread-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:10px}
+.field-lbl{font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.field-input{width:100%;background:#0a0a0a;border:1px solid var(--border);color:var(--text);font-size:16px;font-weight:700;padding:10px 12px;border-radius:7px;outline:none;transition:border-color .2s;font-variant-numeric:tabular-nums}
+.field-input:focus{border-color:rgba(212,169,74,.5)}
+.field-input.green{color:var(--green)}
+.field-input.red-c{color:var(--red)}
+.hint{font-size:9px;color:var(--muted);background:rgba(255,255,255,.03);padding:7px 10px;border-radius:5px;margin-top:6px;letter-spacing:.04em}
+
+/* breakdown table */
+.breakdown-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.breakdown-tbl th{font-size:8px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)}
+.breakdown-tbl td{padding:8px 8px;border-bottom:1px solid rgba(255,255,255,.03)}
+.breakdown-tbl tr:last-child td{border-bottom:none}
+.breakdown-tbl .buy{color:var(--green);font-weight:700;text-align:right}
+.breakdown-tbl .sell{color:var(--red);font-weight:700;text-align:right}
+
+/* override rows */
+.ovr-row{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:7px;padding:12px;margin-bottom:8px;display:grid;grid-template-columns:20px 90px 1fr 1fr;gap:10px;align-items:start}
+.ovr-label{font-size:11px;font-weight:700;color:var(--gold);padding-top:2px}
+.ovr-preview{grid-column:1/-1;display:flex;justify-content:flex-end;align-items:center;gap:10px;padding-top:6px;border-top:1px solid var(--border);margin-top:4px;font-size:10px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:7px;font-size:11px;font-weight:700;letter-spacing:.07em;cursor:pointer;border:none;transition:all .15s}
+.btn-gold{background:var(--gold);color:#000}
+.btn-gold:hover{background:#e8b84b}
+.btn-outline{background:transparent;border:1px solid var(--border-gold);color:var(--gold)}
+.btn-outline:hover{background:rgba(212,169,74,.08)}
+.btn-green{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--green)}
+.btn-green:hover{background:rgba(34,197,94,.2)}
+.btn-red{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--red)}
+.btn-red:hover{background:rgba(239,68,68,.18)}
+.btn-purple{background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);color:#818cf8}
+.save-bar{display:flex;justify-content:flex-end;padding-top:14px;border-top:1px solid var(--border);margin-top:8px}
+
+/* shop form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-field{display:flex;flex-direction:column;gap:5px}
+.form-field.full{grid-column:1/-1}
+.form-lbl{font-size:9px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.form-input{background:#0a0a0a;border:1px solid var(--border);color:var(--text);font-size:13px;padding:9px 12px;border-radius:7px;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:rgba(212,169,74,.4)}
+
+/* media slots */
+.media-slot-row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px}
+.slot-num{font-size:9px;letter-spacing:.1em;color:var(--muted);min-width:20px}
+.slot-name{flex:1;font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot-type{font-size:9px;color:var(--muted);text-transform:uppercase}
+.slot-upload-label{flex:1;font-size:12px;color:var(--muted);cursor:pointer}
+.upload-box{border:2px dashed rgba(212,169,74,.2);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;position:relative}
+.upload-box:hover{border-color:rgba(212,169,74,.5)}
+.upload-box input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+
+/* orders */
+.order-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:8px;border-left-width:3px;border-left-style:solid}
+.order-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px;flex-wrap:wrap}
+.order-id{font-size:10px;color:var(--muted)}
+.order-name{font-size:13px;font-weight:700;margin-left:8px}
+.order-phone{font-size:11px;color:var(--muted);margin-left:6px}
+.status-pill{font-size:9px;font-weight:800;letter-spacing:.08em;padding:3px 9px;border-radius:10px}
+.order-details{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.order-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.order-date{font-size:10px;color:var(--muted);flex:1}
+.order-price{font-size:13px;font-weight:700;color:var(--gold);margin-left:auto}
+.order-note{font-size:11px;color:var(--muted);background:rgba(255,255,255,.03);padding:6px 8px;border-radius:4px;margin-bottom:8px}
+.filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.filter-select{background:#0a0a0a;border:1px solid var(--border);color:var(--muted);font-size:10px;padding:6px 10px;border-radius:5px;outline:none}
+.orders-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+
+/* toast */
+.toast{position:fixed;bottom:20px;right:20px;z-index:9000;padding:12px 18px;border-radius:8px;font-size:12px;font-weight:700;letter-spacing:.06em;display:none;animation:fadeup .3s ease}
+@keyframes fadeup{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">TR⬥NSGOLD</div>
+    <div class="auth-sub">Admin Dashboard</div>
+    <div class="auth-label">Password</div>
+    <input type="password" class="auth-input" id="authPw" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doAuth()">
+    <button class="auth-btn" onclick="doAuth()">SIGN IN</button>
+    <div class="auth-err" id="authErr">Incorrect password</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;flex-direction:row;height:100vh">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">TR⬥NSGOLD</div>
+      <div class="sb-sub">Admin Panel</div>
+    </div>
+
+    <div class="sb-section">Overview</div>
+    <div class="sb-item active" onclick="navTo('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+
+    <div class="sb-section">Market</div>
+    <div class="sb-item" onclick="navTo('prices',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      Prices & Spread
+    </div>
+
+    <div class="sb-section">Management</div>
+    <div class="sb-item" onclick="navTo('orders',this);loadOrders()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Orders
+      <span class="sb-badge" id="sbOrderBadge">0</span>
+    </div>
+    <div class="sb-item" onclick="navTo('shop',this);loadShopInfo()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Shop Info
+    </div>
+    <div class="sb-item" onclick="navTo('media',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Media
+    </div>
+
+    <div class="sb-footer">
+      <div class="sb-user">Signed in as Admin</div>
+      <div class="sb-logout" onclick="doLogout()">Sign out</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-right">
+        <div class="live-pill"><span class="dot"></span>LIVE</div>
+        <div class="topbar-time" id="topClock">--:--:--</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── DASHBOARD PAGE ── -->
+      <div class="page active" id="page-dashboard">
+        <div class="price-bar">
+          <div class="price-box">
+            <div class="price-box-lbl">Gold (XAU/USD) — Arakkal</div>
+            <div class="price-box-val" id="db-gold">—</div>
+            <div class="price-box-sub" id="db-gold-spread">With spread: —</div>
+          </div>
+          <div class="price-box">
+            <div class="price-box-lbl">Silver (XAG/USD) — Arakkal</div>
+            <div class="price-box-val" id="db-silver">—</div>
+            <div class="price-box-sub" id="db-silver-spread">With spread: —</div>
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="stat-val" id="db-total" style="color:var(--gold)">—</div>
+            <div class="stat-lbl">Total Orders</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val" id="db-pending" style="color:#fbbf24">—</div>
+            <div class="stat-lbl">Pending</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val" id="db-approved" style="color:var(--green)">—</div>
+            <div class="stat-lbl">Approved</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val" id="db-value" style="color:var(--text);font-size:16px">—</div>
+            <div class="stat-lbl">AED Value</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Board Prices (999·1GM Gold / 999·1KG Silver)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+            <div>
+              <div style="font-size:9px;color:var(--muted);margin-bottom:6px">GOLD 999·1GM (AED)</div>
+              <div style="display:flex;gap:16px">
+                <div><div style="font-size:8px;color:var(--green);margin-bottom:2px">BUY</div><div style="font-size:18px;font-weight:800;color:var(--green)" id="db-goldBuy">—</div></div>
+                <div><div style="font-size:8px;color:var(--red);margin-bottom:2px">SELL</div><div style="font-size:18px;font-weight:800;color:var(--red)" id="db-goldSell">—</div></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--muted);margin-bottom:6px">SILVER 999·1KG (AED)</div>
+              <div style="display:flex;gap:16px">
+                <div><div style="font-size:8px;color:var(--green);margin-bottom:2px">BUY</div><div style="font-size:18px;font-weight:800;color:var(--green)" id="db-silverBuy">—</div></div>
+                <div><div style="font-size:8px;color:var(--red);margin-bottom:2px">SELL</div><div style="font-size:18px;font-weight:800;color:var(--red)" id="db-silverSell">—</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PRICES PAGE ── -->
+      <div class="page" id="page-prices">
+        <!-- Master Spread -->
+        <div class="card">
+          <div class="card-title">🟡 Gold — Master Offset <span style="font-weight:400;color:var(--muted)">(AED per gram · 24K 999·1GM)</span></div>
+          <div class="spread-grid">
+            <div>
+              <div class="field-lbl">▼ BID — We Buy from Customer (SELL price)</div>
+              <input type="number" class="field-input red-c" id="masterGoldBid" value="-5" step="0.5" oninput="updatePreviews()">
+            </div>
+            <div>
+              <div class="field-lbl">▲ ASK — We Sell to Customer (BUY price)</div>
+              <input type="number" class="field-input green" id="masterGoldAsk" value="5" step="0.5" oninput="updatePreviews()">
+            </div>
+          </div>
+          <div class="hint">Set offset for 24K 999·1GM &nbsp;·&nbsp; auto-scales: 1KG=×1000 &nbsp;·&nbsp; 916GM=×0.916 &nbsp;·&nbsp; TTB=×116.64</div>
+        </div>
+
+        <!-- Gold Breakdown -->
+        <div class="card">
+          <div class="card-title">📊 Gold — Live Breakdown</div>
+          <table class="breakdown-tbl">
+            <tr><th>Row</th><th style="text-align:right">SELL (BID)</th><th style="text-align:right">BUY (ASK)</th></tr>
+            <tr><td>9999·1KG</td><td class="sell" id="sb_gold_0">—</td><td class="buy" id="sa_gold_0">—</td></tr>
+            <tr><td>995·1KG</td><td class="sell" id="sb_gold_1">—</td><td class="buy" id="sa_gold_1">—</td></tr>
+            <tr><td>916·1GM</td><td class="sell" id="sb_gold_2">—</td><td class="buy" id="sa_gold_2">—</td></tr>
+            <tr><td>999·1GM</td><td class="sell" id="sb_gold_3">—</td><td class="buy" id="sa_gold_3">—</td></tr>
+            <tr><td>1TB·TTB</td><td class="sell" id="sb_gold_4">—</td><td class="buy" id="sa_gold_4">—</td></tr>
+          </table>
+        </div>
+
+        <!-- Gold Overrides -->
+        <div class="card">
+          <div class="card-title">⚙️ Gold — Custom Row Override</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:12px">Tick a row to set its own BID / ASK instead of master</div>
+          <div id="goldOvrRows"></div>
+        </div>
+
+        <!-- Silver Master -->
+        <div class="card">
+          <div class="card-title">⬜ Silver — Master Offset <span style="font-weight:400;color:var(--muted)">(AED per gram · 999 pure)</span></div>
+          <div class="spread-grid">
+            <div>
+              <div class="field-lbl">▼ BID — We Buy from Customer</div>
+              <input type="number" class="field-input red-c" id="masterSilverBid" value="0" step="0.1" oninput="updatePreviews()">
+            </div>
+            <div>
+              <div class="field-lbl">▲ ASK — We Sell to Customer</div>
+              <input type="number" class="field-input green" id="masterSilverAsk" value="0" step="0.1" oninput="updatePreviews()">
+            </div>
+          </div>
+          <div class="hint">Auto-scales to all rows &nbsp;·&nbsp; 1KG = ×1000 &nbsp;·&nbsp; TTB = ×116.64</div>
+        </div>
+
+        <!-- Silver Breakdown -->
+        <div class="card">
+          <div class="card-title">📊 Silver — Live Breakdown</div>
+          <table class="breakdown-tbl">
+            <tr><th>Row</th><th style="text-align:right">SELL (BID)</th><th style="text-align:right">BUY (ASK)</th></tr>
+            <tr><td>999·1KG</td><td class="sell" id="sb_silver_0">—</td><td class="buy" id="sa_silver_0">—</td></tr>
+            <tr><td>999·TTB</td><td class="sell" id="sb_silver_1">—</td><td class="buy" id="sa_silver_1">—</td></tr>
+          </table>
+        </div>
+
+        <!-- Silver Overrides -->
+        <div class="card">
+          <div class="card-title">⚙️ Silver — Custom Row Override</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:12px">Tick a row to set its own BID / ASK instead of master</div>
+          <div id="silverOvrRows"></div>
+        </div>
+
+        <div class="save-bar">
+          <button class="btn btn-gold" onclick="saveSpread()">✓ SAVE & APPLY TO BOARD</button>
+        </div>
+      </div>
+
+      <!-- ── ORDERS PAGE ── -->
+      <div class="page" id="page-orders">
+        <div class="orders-stats">
+          <div class="stat"><div class="stat-val" style="color:var(--gold)" id="os-total">—</div><div class="stat-lbl">Total</div></div>
+          <div class="stat"><div class="stat-val" style="color:#fbbf24" id="os-pending">—</div><div class="stat-lbl">Pending</div></div>
+          <div class="stat"><div class="stat-val" style="color:var(--green)" id="os-approved">—</div><div class="stat-lbl">Approved</div></div>
+          <div class="stat"><div class="stat-val" style="color:var(--text);font-size:15px" id="os-value">—</div><div class="stat-lbl">AED Value</div></div>
+        </div>
+        <div class="filter-bar">
+          <select class="filter-select" id="ordersFilter" onchange="renderOrders()">
+            <option value="all">ALL</option>
+            <option value="pending">PENDING</option>
+            <option value="approved">APPROVED</option>
+            <option value="completed">COMPLETED</option>
+            <option value="cancelled">CANCELLED</option>
+          </select>
+          <button class="btn btn-outline" onclick="loadOrders()">↻ REFRESH</button>
+        </div>
+        <div id="ordersList"><div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">Click Refresh to load orders</div></div>
+      </div>
+
+      <!-- ── SHOP PAGE ── -->
+      <div class="page" id="page-shop">
+        <div class="card">
+          <div class="card-title">🏪 Shop Info — Contact Details</div>
+          <div class="form-grid">
+            <div class="form-field"><div class="form-lbl">Shop Name</div><input class="form-input" id="shopName" placeholder="Transgold Markets"></div>
+            <div class="form-field"><div class="form-lbl">Tagline</div><input class="form-input" id="shopTagline" placeholder="Your Trusted Gold Partner"></div>
+            <div class="form-field"><div class="form-lbl">WhatsApp (+971…)</div><input class="form-input" id="shopWhatsapp" placeholder="+971500000000"></div>
+            <div class="form-field"><div class="form-lbl">Phone</div><input class="form-input" id="shopPhone" placeholder="+97140000000"></div>
+            <div class="form-field"><div class="form-lbl">Email</div><input class="form-input" id="shopEmail" placeholder="info@transgoldmarkets.com"></div>
+            <div class="form-field"><div class="form-lbl">Google Maps URL</div><input class="form-input" id="shopMaps" placeholder="https://maps.google.com/..."></div>
+            <div class="form-field full"><div class="form-lbl">Address</div><input class="form-input" id="shopAddress" placeholder="Gold Souk, Deira, Dubai, UAE"></div>
+            <div class="form-field"><div class="form-lbl">Hours Row 1 — Day</div><input class="form-input" id="shopH1Day" placeholder="Monday - Saturday"></div>
+            <div class="form-field"><div class="form-lbl">Hours Row 1 — Time</div><input class="form-input" id="shopH1Time" placeholder="9:00 AM - 9:00 PM"></div>
+            <div class="form-field"><div class="form-lbl">Hours Row 2 — Day</div><input class="form-input" id="shopH2Day" placeholder="Sunday"></div>
+            <div class="form-field"><div class="form-lbl">Hours Row 2 — Time</div><input class="form-input" id="shopH2Time" placeholder="10:00 AM - 6:00 PM"></div>
+          </div>
+          <div class="save-bar">
+            <button class="btn btn-gold" onclick="saveShopInfo()">✓ SAVE SHOP INFO</button>
+          </div>
+          <div id="shopMsg" style="font-size:11px;color:var(--green);text-align:right;margin-top:8px;display:none">Saved!</div>
+        </div>
+      </div>
+
+      <!-- ── MEDIA PAGE ── -->
+      <div class="page" id="page-media">
+        <div class="card">
+          <div class="card-title">🖼 Media Slots (up to 3)</div>
+          <div id="mediaSlots"></div>
+          <div style="margin-top:12px">
+            <button class="btn btn-red" onclick="removeAllMedia()">✕ Clear All Media</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+const ADMIN_PASS = 'admin2024';
+const AED = 3.6725;
+const TROY = 31.1035;
+const WEIGHT_GM = { gold:[1000,1000,1,1,116.64], silver:[1000,116.64] };
+const WEIGHT_OZ = { gold:[32.1507,32.1507,0.032151,0.032151,3.75], silver:[32.1507,3.75] };
+const PURITY    = { gold:[1.0,0.995,0.916,0.999,1.0] };
+const GOLD_ROWS   = ['9999·1KG','995·1KG','916·1GM','999·1GM','1TB·TTB'];
+const SILVER_ROWS = ['999·1KG','999·TTB'];
+
+let spotUSD = { gold:4090.02, silver:59.255 };
+let MASTER  = { goldBid:-5, goldAsk:5, silverBid:0, silverAsk:0 };
+let OVERRIDE = { gold:[null,null,null,null,null], silver:[null,null] };
+let ordersData = [];
+let mediaSlots = [null,null,null];
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function doAuth(){
+  const pw = document.getElementById('authPw').value;
+  if(pw === ADMIN_PASS){
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    init();
+  } else {
+    document.getElementById('authErr').style.display = 'block';
+    document.getElementById('authPw').value = '';
+  }
+}
+document.getElementById('authPw').addEventListener('keydown', e => { if(e.key==='Enter') doAuth(); });
+
+function doLogout(){
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('authPw').value = '';
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+const PAGE_TITLES = { dashboard:'Dashboard', prices:'Prices & Spread', orders:'Orders', shop:'Shop Info', media:'Media' };
+function navTo(name, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = PAGE_TITLES[name]||name;
+  if(name==='prices') updatePreviews();
+}
+
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
+function tick(){
+  const n = new Date();
+  document.getElementById('topClock').textContent = n.toLocaleTimeString('en-AE',{hour12:false,timeZone:'Asia/Dubai'});
+}
+tick(); setInterval(tick,1000);
+
+// ── SPREAD CALC ───────────────────────────────────────────────────────────────
+function fmt(n){ return Number(n).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+function getBidAsk(type, i){
+  const ovr = OVERRIDE[type][i];
+  if(ovr){ return { bid:ovr.bid, ask:ovr.ask }; }
+  const wg = WEIGHT_GM[type][i];
+  const pur = (type==='gold') ? (PURITY.gold[i]||1) : 1;
+  return { bid:MASTER[type+'Bid']*wg*pur, ask:MASTER[type+'Ask']*wg*pur };
+}
+
+function calcPrice(type, i, bid, ask){
+  const spot = type==='gold' ? spotUSD.gold : spotUSD.silver;
+  const pur  = (type==='gold') ? (PURITY.gold[i]||1) : 1;
+  const mid  = spot * WEIGHT_OZ[type][i] * AED * pur;
+  return { buy: mid + ask, sell: mid + bid };
+}
+
+function updatePreviews(){
+  const lm = {
+    goldBid:   parseFloat(document.getElementById('masterGoldBid').value)||0,
+    goldAsk:   parseFloat(document.getElementById('masterGoldAsk').value)||0,
+    silverBid: parseFloat(document.getElementById('masterSilverBid').value)||0,
+    silverAsk: parseFloat(document.getElementById('masterSilverAsk').value)||0,
+  };
+  ['gold','silver'].forEach(type => {
+    const count = type==='gold' ? 5 : 2;
+    for(let i=0;i<count;i++){
+      const chk = document.getElementById('ovr_'+type+'_'+i);
+      const wg  = WEIGHT_GM[type][i];
+      const pur = (type==='gold') ? (PURITY.gold[i]||1) : 1;
+      let bid,ask;
+      if(chk && chk.checked){
+        bid = parseFloat(document.getElementById('ovrBid_'+type+'_'+i).value)||0;
+        ask = parseFloat(document.getElementById('ovrAsk_'+type+'_'+i).value)||0;
+      } else {
+        bid = lm[type+'Bid'] * wg * pur;
+        ask = lm[type+'Ask'] * wg * pur;
+      }
+      const sb = document.getElementById('sb_'+type+'_'+i);
+      const sa = document.getElementById('sa_'+type+'_'+i);
+      if(sb) sb.textContent = fmt(bid);
+      if(sa) sa.textContent = fmt(ask);
+      // per-row board price preview
+      const spot = type==='gold' ? spotUSD.gold : spotUSD.silver;
+      const mid  = spot * WEIGHT_OZ[type][i] * AED * pur;
+      const pb = document.getElementById('prev_buy_'+type+'_'+i);
+      const ps = document.getElementById('prev_sell_'+type+'_'+i);
+      if(pb) pb.textContent = fmt(mid+ask);
+      if(ps) ps.textContent = fmt(mid+bid);
+    }
+  });
+  updateDashboard();
+}
+
+// ── BUILD OVERRIDE ROWS ───────────────────────────────────────────────────────
+function buildOvrRows(){
+  ['gold','silver'].forEach(type => {
+    const rows = type==='gold' ? GOLD_ROWS : SILVER_ROWS;
+    const cont = document.getElementById(type+'OvrRows');
+    cont.innerHTML = rows.map((label,i) => `
+      <div class="ovr-row">
+        <input type="checkbox" id="ovr_${type}_${i}" onchange="syncOvr('${type}',${i});updatePreviews()" style="accent-color:var(--gold);margin-top:3px">
+        <div class="ovr-label">${label}</div>
+        <div>
+          <div class="field-lbl" style="font-size:8px">BID (SELL price)</div>
+          <input type="number" class="field-input red-c" id="ovrBid_${type}_${i}" value="0" step="${type==='gold'&&i<2?100:0.5}" disabled style="font-size:13px;padding:7px 10px">
+        </div>
+        <div>
+          <div class="field-lbl" style="font-size:8px">ASK (BUY price)</div>
+          <input type="number" class="field-input green" id="ovrAsk_${type}_${i}" value="0" step="${type==='gold'&&i<2?100:0.5}" disabled style="font-size:13px;padding:7px 10px">
+        </div>
+        <div class="ovr-preview">
+          <span style="color:var(--muted)">BOARD PRICE →</span>
+          <span style="color:var(--green);font-weight:700" id="prev_buy_${type}_${i}">—</span>
+          <span style="color:var(--muted)">/</span>
+          <span style="color:var(--red);font-weight:700" id="prev_sell_${type}_${i}">—</span>
+        </div>
+      </div>`).join('');
+  });
+}
+
+function syncOvr(type,i){
+  const chk = document.getElementById('ovr_'+type+'_'+i);
+  const be  = document.getElementById('ovrBid_'+type+'_'+i);
+  const ae  = document.getElementById('ovrAsk_'+type+'_'+i);
+  be.disabled = !chk.checked;
+  ae.disabled = !chk.checked;
+}
+
+// ── SAVE SPREAD ───────────────────────────────────────────────────────────────
+function saveSpread(){
+  MASTER.goldBid   = parseFloat(document.getElementById('masterGoldBid').value)||0;
+  MASTER.goldAsk   = parseFloat(document.getElementById('masterGoldAsk').value)||0;
+  MASTER.silverBid = parseFloat(document.getElementById('masterSilverBid').value)||0;
+  MASTER.silverAsk = parseFloat(document.getElementById('masterSilverAsk').value)||0;
+  ['gold','silver'].forEach(type=>{
+    const count = type==='gold'?5:2;
+    for(let i=0;i<count;i++){
+      const chk = document.getElementById('ovr_'+type+'_'+i);
+      if(chk && chk.checked){
+        OVERRIDE[type][i] = {
+          bid: parseFloat(document.getElementById('ovrBid_'+type+'_'+i).value),
+          ask: parseFloat(document.getElementById('ovrAsk_'+type+'_'+i).value)
+        };
+      } else { OVERRIDE[type][i] = null; }
+    }
+  });
+  fetch('/save_spread.php',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({master:MASTER, override:OVERRIDE})
+  }).then(r=>r.json()).then(d=>toast(d.ok?'✓ Saved — all devices updated':'⚠ Save failed','ok'))
+    .catch(()=>toast('⚠ Could not reach server','err'));
+}
+
+// ── LOAD SPREAD ───────────────────────────────────────────────────────────────
+async function loadSpread(){
+  try {
+    const r = await fetch('/spread.json?t='+Date.now());
+    if(!r.ok) return;
+    const d = await r.json();
+    if(d.master){
+      MASTER = {...MASTER,...d.master};
+      document.getElementById('masterGoldBid').value   = d.master.goldBid;
+      document.getElementById('masterGoldAsk').value   = d.master.goldAsk;
+      document.getElementById('masterSilverBid').value = d.master.silverBid;
+      document.getElementById('masterSilverAsk').value = d.master.silverAsk;
+    }
+    if(d.override){
+      ['gold','silver'].forEach(type=>{
+        (d.override[type]||[]).forEach((ovr,i)=>{
+          OVERRIDE[type][i] = ovr;
+          const chk = document.getElementById('ovr_'+type+'_'+i);
+          if(chk && ovr){
+            chk.checked = true;
+            const be = document.getElementById('ovrBid_'+type+'_'+i);
+            const ae = document.getElementById('ovrAsk_'+type+'_'+i);
+            if(be){ be.value=ovr.bid; be.disabled=false; }
+            if(ae){ ae.value=ovr.ask; ae.disabled=false; }
+          }
+        });
+      });
+    }
+    updatePreviews();
+  } catch(e){ console.warn('Could not load spread',e); }
+}
+
+// ── LIVE PRICES ───────────────────────────────────────────────────────────────
+async function fetchPrices(){
+  try {
+    const r = await fetch('/api/prices.php');
+    const d = await r.json();
+    if(d.ok && d.gold){
+      spotUSD.gold   = d.gold;
+      spotUSD.silver = d.silver;
+      if(d.spread){ MASTER = {...MASTER,...d.spread}; }
+      updateDashboard();
+      updatePreviews();
+    }
+  } catch(e){}
+}
+
+function updateDashboard(){
+  const el = id => document.getElementById(id);
+  if(el('db-gold'))   el('db-gold').textContent   = '$'+spotUSD.gold.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3});
+  if(el('db-silver')) el('db-silver').textContent = '$'+spotUSD.silver.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3});
+  // spread-adjusted
+  const gSpread = spotUSD.gold   + (MASTER.goldAsk   * WEIGHT_GM.gold[0])   / (WEIGHT_OZ.gold[0]   * AED * PURITY.gold[0]);
+  const sSpread = spotUSD.silver + (MASTER.silverAsk  * WEIGHT_GM.silver[0]) / (WEIGHT_OZ.silver[0] * AED);
+  if(el('db-gold-spread'))   el('db-gold-spread').textContent   = 'With spread: $'+gSpread.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' USD/oz';
+  if(el('db-silver-spread')) el('db-silver-spread').textContent = 'With spread: $'+sSpread.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})+' USD/oz';
+  // 999·1GM gold board price
+  const {bid:gb,ask:ga} = getBidAsk('gold',3);
+  const gp = calcPrice('gold',3,gb,ga);
+  if(el('db-goldBuy'))  el('db-goldBuy').textContent  = fmt(gp.buy);
+  if(el('db-goldSell')) el('db-goldSell').textContent = fmt(gp.sell);
+  // 999·1KG silver
+  const {bid:sb,ask:sa} = getBidAsk('silver',0);
+  const sp = calcPrice('silver',0,sb,sa);
+  if(el('db-silverBuy'))  el('db-silverBuy').textContent  = fmt(sp.buy);
+  if(el('db-silverSell')) el('db-silverSell').textContent = fmt(sp.sell);
+}
+
+// ── ORDERS ────────────────────────────────────────────────────────────────────
+async function loadOrders(){
+  document.getElementById('ordersList').innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">Loading…</div>';
+  try {
+    const r = await fetch('/api/orders.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({admin_password:ADMIN_PASS})});
+    const d = await r.json();
+    if(!d.success) throw new Error(d.error||'Failed');
+    ordersData = d.orders||[];
+    updateOrderStats();
+    renderOrders();
+    const pending = ordersData.filter(o=>!o.status||o.status==='pending').length;
+    const badge = document.getElementById('sbOrderBadge');
+    if(badge){ badge.textContent=pending; badge.style.display=pending>0?'inline':'none'; }
+    // update dashboard stats
+    const el = id=>document.getElementById(id);
+    const total = ordersData.reduce((s,o)=>s+parseFloat(o.price_aed||0),0);
+    if(el('db-total'))    el('db-total').textContent    = ordersData.length;
+    if(el('db-pending'))  el('db-pending').textContent  = pending;
+    if(el('db-approved')) el('db-approved').textContent = ordersData.filter(o=>o.status==='approved').length;
+    if(el('db-value'))    el('db-value').textContent    = 'AED '+Math.round(total).toLocaleString();
+  } catch(e){
+    document.getElementById('ordersList').innerHTML = '<div style="text-align:center;padding:40px;color:var(--red);font-size:12px">Failed: '+e.message+'</div>';
+  }
+}
+
+function updateOrderStats(){
+  const el = id=>document.getElementById(id);
+  const pending  = ordersData.filter(o=>!o.status||o.status==='pending').length;
+  const approved = ordersData.filter(o=>o.status==='approved').length;
+  const total    = ordersData.reduce((s,o)=>s+parseFloat(o.price_aed||0),0);
+  if(el('os-total'))    el('os-total').textContent    = ordersData.length;
+  if(el('os-pending'))  el('os-pending').textContent  = pending;
+  if(el('os-approved')) el('os-approved').textContent = approved;
+  if(el('os-value'))    el('os-value').textContent    = 'AED '+Math.round(total).toLocaleString();
+}
+
+function renderOrders(){
+  const filter = document.getElementById('ordersFilter').value;
+  const list   = filter==='all' ? ordersData : ordersData.filter(o=>(o.status||'pending')===filter);
+  const cont   = document.getElementById('ordersList');
+  if(!list.length){ cont.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">No orders</div>'; return; }
+  const sc = {pending:'#fbbf24',approved:'#22C55E',cancelled:'#EF4444',completed:'#818cf8'};
+  cont.innerHTML = list.map(o=>{
+    const clr = sc[o.status||'pending']||'#fbbf24';
+    const mc  = (o.metal||'').toLowerCase()==='gold'?'var(--gold)':'#b0bac8';
+    const tc  = o.type==='buy'?'var(--green)':'var(--red)';
+    const dt  = new Date(o.created_at).toLocaleString('en-AE',{dateStyle:'short',timeStyle:'short'});
+    const pr  = parseFloat(o.price_aed||0).toLocaleString('en-AE',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const ip  = !o.status||o.status==='pending';
+    const ia  = o.status==='approved';
+    return `<div class="order-card" style="border-left-color:${clr}">
+      <div class="order-hdr">
+        <div><span class="order-id">#${o.id}</span><span class="order-name">${esc(o.customer_name||'Unknown')}</span><span class="order-phone">${esc(o.customer_phone||'')}</span></div>
+        <span class="status-pill" style="background:${clr}22;color:${clr};border:1px solid ${clr}44">${(o.status||'PENDING').toUpperCase()}</span>
+      </div>
+      ${o.admin_notes||o.notes?`<div class="order-note">📝 ${esc(o.admin_notes||o.notes)}</div>`:''}
+      <div class="order-details">
+        <span style="font-size:12px;font-weight:700;color:${mc}">${esc(o.purity||'')} ${(o.metal||'').toUpperCase()}</span>
+        <span style="font-size:10px;font-weight:800;color:${tc};background:${tc}18;padding:2px 7px;border-radius:4px;border:1px solid ${tc}33">${(o.type||'BUY').toUpperCase()}</span>
+        <span style="font-size:12px">${o.weight} ${o.unit||''}</span>
+        <span class="order-price">AED ${pr}</span>
+      </div>
+      <div class="order-actions">
+        <span class="order-date">${dt}</span>
+        ${ip?`<button class="btn btn-green" style="padding:5px 10px;font-size:10px" onclick="updateOrder(${o.id},'approved')">✓ Approve</button><button class="btn btn-red" style="padding:5px 10px;font-size:10px" onclick="updateOrder(${o.id},'cancelled')">✕ Cancel</button>`:''}
+        ${ia?`<button class="btn btn-purple" style="padding:5px 10px;font-size:10px" onclick="updateOrder(${o.id},'completed')">✓ Complete</button>`:''}
+        <button class="btn" style="padding:5px 10px;font-size:10px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted)" onclick="addNote(${o.id})">📝 Note</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function updateOrder(id, status, notes){
+  try {
+    const body = {admin_password:ADMIN_PASS, order_id:id, status};
+    if(notes!==undefined) body.admin_notes = notes;
+    const r = await fetch('/api/orders.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d = await r.json();
+    if(!d.success) throw new Error(d.error||'Failed');
+    const o = ordersData.find(x=>x.id==id);
+    if(o){ if(status) o.status=status; if(notes!==undefined) o.admin_notes=notes; }
+    updateOrderStats(); renderOrders();
+    toast(notes!==undefined?'Note saved':`Order #${id} → ${status.toUpperCase()}`,'ok');
+  } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+function addNote(id){
+  const o = ordersData.find(x=>x.id==id);
+  const n = prompt('Note for Order #'+id+':', o?.admin_notes||'');
+  if(n!==null) updateOrder(id, o?.status||'pending', n);
+}
+
+// ── SHOP ──────────────────────────────────────────────────────────────────────
+async function loadShopInfo(){
+  try {
+    const r = await fetch('/api/shop.php');
+    const d = await r.json();
+    const f = (id,val) => { const e=document.getElementById(id); if(e) e.value=val||''; };
+    f('shopName',d.name); f('shopTagline',d.tagline); f('shopWhatsapp',d.whatsapp);
+    f('shopPhone',d.phone); f('shopEmail',d.email); f('shopAddress',d.address); f('shopMaps',d.mapsUrl);
+    if(d.hours&&d.hours[0]){ f('shopH1Day',d.hours[0].day); f('shopH1Time',d.hours[0].time); }
+    if(d.hours&&d.hours[1]){ f('shopH2Day',d.hours[1].day); f('shopH2Time',d.hours[1].time); }
+  } catch(e){}
+}
+
+async function saveShopInfo(){
+  const g = id => document.getElementById(id)?.value||'';
+  const data = {
+    name:g('shopName'), tagline:g('shopTagline'), whatsapp:g('shopWhatsapp'),
+    phone:g('shopPhone'), email:g('shopEmail'), address:g('shopAddress'), mapsUrl:g('shopMaps'),
+    hours:[{day:g('shopH1Day'),time:g('shopH1Time')},{day:g('shopH2Day'),time:g('shopH2Time')}]
+  };
+  try {
+    const r = await fetch('/api/shop.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    const d = await r.json();
+    if(d.success){ toast('✓ Shop info saved','ok'); }
+    else throw new Error('Save failed');
+  } catch(e){ toast('Save failed','err'); }
+}
+
+// ── MEDIA ─────────────────────────────────────────────────────────────────────
+const UPLOAD_PHP = '/upload.php';
+
+function renderMedia(){
+  const cont = document.getElementById('mediaSlots');
+  cont.innerHTML = mediaSlots.map((slot,i)=>`
+    <div class="media-slot-row">
+      <span class="slot-num">0${i+1}</span>
+      ${slot?`
+        <span class="slot-name">${slot.name}</span>
+        <span class="slot-type">${slot.type}</span>
+        <button class="btn btn-red" style="padding:4px 10px;font-size:10px" onclick="removeSlot(${i})">✕ Remove</button>
+      `:`
+        <label class="slot-upload-label" id="slotLbl${i}">
+          Click to upload image or video
+          <input type="file" accept="image/*,video/*" style="display:none" onchange="uploadSlot(event,${i})">
+        </label>
+        <span style="font-size:18px">📷</span>
+      `}
+    </div>`).join('');
+}
+
+async function uploadSlot(e,i){
+  const file = e.target.files[0]; if(!file) return;
+  const lbl = document.getElementById('slotLbl'+i);
+  if(lbl) lbl.textContent = '⏳ Uploading…';
+  const fd = new FormData(); fd.append('action','upload'); fd.append('slot',i); fd.append('file',file);
+  try {
+    const r = await fetch(UPLOAD_PHP,{method:'POST',body:fd});
+    const d = await r.json();
+    if(!d.success) throw new Error(d.error||'Upload failed');
+    mediaSlots = d.slots; renderMedia(); toast('✓ Slot '+(i+1)+' saved','ok');
+  } catch(err){ toast('Upload error: '+err.message,'err'); renderMedia(); }
+}
+
+async function removeSlot(i){
+  const fd=new FormData(); fd.append('action','remove'); fd.append('slot',i);
+  try {
+    const r=await fetch(UPLOAD_PHP,{method:'POST',body:fd}); const d=await r.json();
+    if(!d.success) throw new Error(d.error);
+    mediaSlots=d.slots; renderMedia(); toast('Slot '+(i+1)+' removed','ok');
+  } catch(e){ toast('Remove error: '+e.message,'err'); }
+}
+
+async function removeAllMedia(){
+  const fd=new FormData(); fd.append('action','clear');
+  try {
+    const r=await fetch(UPLOAD_PHP,{method:'POST',body:fd}); const d=await r.json();
+    if(!d.success) throw new Error(d.error);
+    mediaSlots=d.slots; renderMedia(); toast('All media cleared','ok');
+  } catch(e){ toast('Error: '+e.message,'err'); }
+}
+
+async function loadMedia(){
+  try {
+    const r=await fetch(UPLOAD_PHP+'?action=list'); const d=await r.json();
+    if(d.success&&Array.isArray(d.slots)){ mediaSlots=d.slots; renderMedia(); }
+  } catch(e){}
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function toast(msg, type){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = type==='err' ? 'rgba(239,68,68,.15)' : 'rgba(34,197,94,.15)';
+  t.style.border = '1px solid '+(type==='err'?'rgba(239,68,68,.4)':'rgba(34,197,94,.4)');
+  t.style.color  = type==='err' ? 'var(--red)' : 'var(--green)';
+  t.style.display = 'block';
+  setTimeout(()=>t.style.display='none', 2500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function init(){
+  buildOvrRows();
+  loadSpread();
+  loadMedia();
+  loadShopInfo();
+  loadOrders();
+  fetchPrices();
+  setInterval(fetchPrices, 30000);
+}
+</script>
+</body>
+</html>
