@@ -428,10 +428,10 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
       <button class="ap-close" id="adminClose">&#10005;</button>
     </div>
     <div style="display:flex;gap:4px;padding:12px 16px 0;border-bottom:1px solid rgba(212,169,74,.12);background:#0d0d0d;">
-      <div class="ap-tab active" onclick="switchTab('prices')">PRICES</div>
-      <div class="ap-tab" onclick="switchTab('shop')">SHOP INFO</div>
-      <div class="ap-tab" onclick="switchTab('media')">MEDIA</div>
-      <div class="ap-tab" onclick="switchTab('orders');loadOrders()" id="orders-tab-btn">ORDERS <span id="orders-pending-badge" style="display:none;background:rgba(239,68,68,.8);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px">0</span></div>
+      <div class="ap-tab active" onclick="switchTab('prices',this)">PRICES</div>
+      <div class="ap-tab" onclick="switchTab('shop',this)">SHOP INFO</div>
+      <div class="ap-tab" onclick="switchTab('media',this)">MEDIA</div>
+      <div class="ap-tab" onclick="switchTab('orders',this);loadOrders()" id="orders-tab-btn">ORDERS <span id="orders-pending-badge" style="display:none;background:rgba(239,68,68,.8);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px">0</span></div>
     </div>
     <div class="ap-body">
       <div id="tab-prices" class="ap-tab-content active">
@@ -1399,11 +1399,11 @@ fetchLivePrices(); // fetch immediately on load
   setInterval(tick, 100);        // update every 100ms for smooth feel
 })();
 
-function switchTab(name) {
+function switchTab(name, el) {
   document.querySelectorAll('.ap-tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.ap-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  event.target.classList.add('active');
+  (el || event.currentTarget).classList.add('active');
 }
 
 loadSpread();      // load saved spread from server
