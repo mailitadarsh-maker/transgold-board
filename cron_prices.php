@@ -4,9 +4,9 @@ $proxyBase = 'https://priceboard.transgoldmarkets.com/api/proxy.php?url=';
 $goldRaw   = @file_get_contents($proxyBase . urlencode('https://portal.arakkalmarkets.com/getprice/GOLD'));
 $silverRaw = @file_get_contents($proxyBase . urlencode('https://portal.arakkalmarkets.com/getprice/SILVER'));
 
-// Strip HTML debug output and extract JSON
-preg_match('/"Bid"[^0-9]*([0-9.]+)/', $goldRaw, $gm);
-preg_match('/"Bid"[^0-9]*([0-9.]+)/', $silverRaw, $sm);
+// Extract Bid value from HTML dump
+preg_match('/"Bid"[^>]*>.*?<span class=sf-dump-num>([0-9.]+)<\/span>/s', $goldRaw, $gm);
+preg_match('/"Bid"[^>]*>.*?<span class=sf-dump-num>([0-9.]+)<\/span>/s', $silverRaw, $sm);
 
 $gold   = isset($gm[1]) ? floatval($gm[1]) : null;
 $silver = isset($sm[1]) ? floatval($sm[1]) : null;
