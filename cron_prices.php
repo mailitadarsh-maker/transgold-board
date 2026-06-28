@@ -1,31 +1,26 @@
 <?php
-// Fetch live price from Arakkal via existing proxy
-$arakkalUrls = [
-    'https://portal.arakkalmarkets.com/api/v1/rates',
-    'https://portal.arakkalmarkets.com/rates',
-    'https://portal.arakkalmarkets.com/api/rates',
-];
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Cache-Control: no-store');
 
-$gold = null;
-$silver = null;
+$goldUrl   = 'https://portal.arakkalmarkets.com/getprice/GOLD';
+$silverUrl = 'https://portal.arakkalmarkets.com/getprice/SILVER';
 
-foreach ($arakkalUrls as $url) {
-    $proxyUrl = 'https://priceboard.transgoldmarkets.com/api/proxy.php?url=' . urlencode($url);
-    $raw = @file_get_contents($proxyUrl);
-    if ($raw) {
-        $data = json_decode($raw, true);
-        if (isset($data['XAU']) || isset($data['gold'])) {
-            $gold = $data['XAU'] ?? $data['gold'];
-            $silver = $data['XAG'] ?? $data['silver'];
-            break;
-        }
-    }
-}
+$proxyBase = 'https://priceboard.transgoldmarkets.com/api/proxy.php?url=';
 
-if ($gold) {
-    $json = json_encode(['gold' => $gold, 'silver' => $silver, 'ok' => true, 'ts' => time()]);
+$goldRaw   = @file_get_contents($proxyBase . urlencode($goldUrl));
+$silverRaw = @file_get_contents($proxyBase . urlencode($silverUrl));
+
+$goldData   = json_decode($goldRaw, true);
+$silverData = json_decode($silverRaw, true);
+
+$gold   = $goldData['price']   ?? $goldData['Price']   ?? $goldData['value'] ?? null;
+$silver = $silverData['price'] ?? $silverData['Price'] ?? $silverData['value'] ?? null;
+
+if ($gold && $silver) {
+    $json = json_encode(['gold' => floatval($gold), 'silver' => floatval($silver), 'ok' => true, 'ts' => time()]);
     file_put_contents(__DIR__ . '/prices.json', $json);
     echo "Updated: gold=$gold silver=$silver";
 } else {
-    echo "Failed to fetch live price";
+    echo "Failed — goldRaw: $goldRaw | silverRaw: $silverRaw";
 }
