@@ -5,11 +5,11 @@ $goldRaw   = @file_get_contents($proxyBase . urlencode('https://portal.arakkalma
 $silverRaw = @file_get_contents($proxyBase . urlencode('https://portal.arakkalmarkets.com/getprice/SILVER'));
 
 // Extract Bid value from HTML dump
-preg_match('/"Bid"[^>]*>.*?<span class=sf-dump-num>([0-9.]+)<\/span>/s', $goldRaw, $gm);
-preg_match('/"Bid"[^>]*>.*?<span class=sf-dump-num>([0-9.]+)<\/span>/s', $silverRaw, $sm);
+preg_match_all('/<span class=sf-dump-num>([0-9.]+)<\/span>/', $goldRaw, $gm);
+preg_match_all('/<span class=sf-dump-num>([0-9.]+)<\/span>/', $silverRaw, $sm);
 
-$gold   = isset($gm[1]) ? floatval($gm[1]) : null;
-$silver = isset($sm[1]) ? floatval($sm[1]) : null;
+$gold   = isset($gm[1][1]) ? floatval($gm[1][1]) : null;
+$silver = isset($sm[1][1]) ? floatval($sm[1][1]) : null;
 
 if ($gold && $silver) {
     $json = json_encode(['gold' => $gold, 'silver' => $silver, 'ok' => true, 'ts' => time()]);
