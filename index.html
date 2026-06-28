@@ -296,7 +296,7 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
 <body>
 
 <header class="hdr">
-  <div class="logo" id="adminTrigger" style="cursor:pointer">
+  <div class="logo">
     <img src="/logo.png" alt="Transgold Markets"
          onerror="this.style.display='none';document.getElementById('fallbackLogo').style.display='flex'">
     <div id="fallbackLogo" style="display:none;align-items:center;gap:10px">
@@ -1212,7 +1212,7 @@ function nextSlide() {
 }
 
 // Admin open/close
-document.getElementById('adminTrigger').addEventListener('click',openAdmin);
+// Admin accessible via /admin.html directly
 document.getElementById('adminClose').addEventListener('click',closeAdmin);
 document.getElementById('adminOverlay').addEventListener('click',function(e){if(e.target===this)closeAdmin()});
 
