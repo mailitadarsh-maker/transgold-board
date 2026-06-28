@@ -431,6 +431,7 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
       <div class="ap-tab active" onclick="switchTab('prices')">PRICES</div>
       <div class="ap-tab" onclick="switchTab('shop')">SHOP INFO</div>
       <div class="ap-tab" onclick="switchTab('media')">MEDIA</div>
+      <div class="ap-tab" onclick="switchTab('orders');loadOrders()" id="orders-tab-btn">ORDERS <span id="orders-pending-badge" style="display:none;background:rgba(239,68,68,.8);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:4px">0</span></div>
     </div>
     <div class="ap-body">
       <div id="tab-prices" class="ap-tab-content active">
@@ -756,6 +757,47 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
           <button class="ap-btn ap-btn-danger" onclick="removeAllMedia()">&#10005; Clear All Media</button>
         </div>
       </div>
+
+      <div id="tab-orders" class="ap-tab-content">
+      <div class="ap-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="ap-section-title" style="margin-bottom:0">&#9632; Orders</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="orders-filter" onchange="renderOrdersTab()" style="background:#0a0a0a;border:1px solid rgba(255,255,255,.1);color:var(--muted);font-size:10px;padding:4px 8px;border-radius:4px;outline:none">
+              <option value="all">ALL</option>
+              <option value="pending">PENDING</option>
+              <option value="approved">APPROVED</option>
+              <option value="completed">COMPLETED</option>
+              <option value="cancelled">CANCELLED</option>
+            </select>
+            <button onclick="loadOrders()" style="background:none;border:1px solid rgba(34,197,94,.3);color:var(--green);font-size:10px;font-weight:700;padding:4px 10px;border-radius:4px;cursor:pointer;letter-spacing:.06em">&#8635; REFRESH</button>
+          </div>
+        </div>
+        <!-- Stats row -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px" id="orders-stats">
+          <div style="background:var(--bg3);border:1px solid rgba(212,169,74,.1);border-radius:8px;padding:10px 12px">
+            <div style="font-size:18px;font-weight:800;color:var(--gold)" id="ostat-total">—</div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:.1em;margin-top:2px">TOTAL</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:10px 12px">
+            <div style="font-size:18px;font-weight:800;color:#fbbf24" id="ostat-pending">—</div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:.1em;margin-top:2px">PENDING</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:10px 12px">
+            <div style="font-size:18px;font-weight:800;color:var(--green)" id="ostat-approved">—</div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:.1em;margin-top:2px">APPROVED</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:10px 12px">
+            <div style="font-size:18px;font-weight:800;color:var(--text)" id="ostat-value" style="font-size:13px">—</div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:.1em;margin-top:2px">AED VALUE</div>
+          </div>
+        </div>
+        <!-- Orders list -->
+        <div id="orders-list" style="display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto">
+          <div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">Click REFRESH to load orders</div>
+        </div>
+      </div>
+      </div><!-- end tab-orders -->
 
       <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)">
         <button class="ap-btn ap-btn-outline" onclick="closeAdmin()">Close</button>
@@ -1421,6 +1463,127 @@ loadShopInfo();
 setInterval(updateClock,1000);
 setInterval(updatePrices,3500);
 setInterval(fetchLivePrices, 30*1000); // refresh every 30s
+
+// ── ORDERS TAB ────────────────────────────────────────────────────────────────
+const ORDERS_API = '/api/orders.php';
+const ORDERS_ADMIN_PASS = 'admin2024';
+let ordersData = [];
+
+async function loadOrders() {
+  const list = document.getElementById('orders-list');
+  if (list) list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px;letter-spacing:.08em">Loading…</div>';
+  try {
+    const res = await fetch(ORDERS_API, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ admin_password: ORDERS_ADMIN_PASS })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Failed');
+    ordersData = data.orders || [];
+    updateOrdersStats();
+    renderOrdersTab();
+    // Update pending badge on tab
+    const pending = ordersData.filter(o => o.status === 'pending' || !o.status).length;
+    const badge = document.getElementById('orders-pending-badge');
+    if (badge) { badge.textContent = pending; badge.style.display = pending > 0 ? 'inline' : 'none'; }
+  } catch(e) {
+    if (list) list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--red);font-size:12px">Failed to load: ' + e.message + '</div>';
+  }
+}
+
+function updateOrdersStats() {
+  const pending  = ordersData.filter(o => o.status === 'pending' || !o.status).length;
+  const approved = ordersData.filter(o => o.status === 'approved').length;
+  const total    = ordersData.reduce((s,o) => s + parseFloat(o.price_aed||0), 0);
+  const el = id => document.getElementById(id);
+  if (el('ostat-total'))   el('ostat-total').textContent   = ordersData.length;
+  if (el('ostat-pending')) el('ostat-pending').textContent = pending;
+  if (el('ostat-approved'))el('ostat-approved').textContent= approved;
+  if (el('ostat-value'))   el('ostat-value').textContent   = 'AED ' + Math.round(total).toLocaleString();
+}
+
+function renderOrdersTab() {
+  const filter = (document.getElementById('orders-filter')||{value:'all'}).value;
+  const filtered = filter === 'all' ? ordersData : ordersData.filter(o => (o.status||'pending') === filter);
+  const list = document.getElementById('orders-list');
+  if (!list) return;
+  if (!filtered.length) { list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">No orders</div>'; return; }
+
+  list.innerHTML = filtered.map(o => {
+    const isPending   = !o.status || o.status === 'pending';
+    const isApproved  = o.status === 'approved';
+    const metalColor  = (o.metal||'').toLowerCase() === 'gold' ? 'var(--gold)' : '#b0bac8';
+    const typeColor   = o.type === 'buy' ? 'var(--green)' : 'var(--red)';
+    const statusColors = { pending:'#fbbf24', approved:'var(--green)', cancelled:'var(--red)', completed:'#818cf8' };
+    const statusColor = statusColors[o.status||'pending'] || '#fbbf24';
+    const date = new Date(o.created_at).toLocaleString('en-AE',{dateStyle:'short',timeStyle:'short'});
+    const price = parseFloat(o.price_aed||0).toLocaleString('en-AE',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+    return `<div style="background:var(--bg3);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px;border-left:3px solid ${statusColor}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px;flex-wrap:wrap">
+        <div>
+          <span style="font-size:10px;color:var(--muted)">#${o.id}</span>
+          <span style="font-size:13px;font-weight:700;color:var(--text);margin-left:8px">${escO(o.customer_name||'Unknown')}</span>
+          <span style="font-size:11px;color:var(--muted);margin-left:6px">${escO(o.customer_phone||'')}</span>
+        </div>
+        <span style="font-size:9px;font-weight:800;letter-spacing:.08em;padding:3px 8px;border-radius:10px;background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44">${(o.status||'PENDING').toUpperCase()}</span>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+        <span style="font-size:12px;font-weight:700;color:${metalColor}">${escO(o.purity||'')} ${(o.metal||'').toUpperCase()}</span>
+        <span style="font-size:10px;font-weight:800;color:${typeColor};background:${typeColor}18;padding:2px 7px;border-radius:4px;border:1px solid ${typeColor}33">${(o.type||'BUY').toUpperCase()}</span>
+        <span style="font-size:12px;color:var(--text)">${o.weight} ${o.unit||''}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--gold);margin-left:auto">AED ${price}</span>
+      </div>
+      ${o.admin_notes||o.notes ? `<div style="font-size:11px;color:var(--muted);background:rgba(255,255,255,.03);padding:6px 8px;border-radius:4px;margin-bottom:8px">📝 ${escO(o.admin_notes||o.notes)}</div>` : ''}
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:10px;color:var(--muted);flex:1">${date}</span>
+        ${isPending ? `
+          <button onclick="updateOrderInline(${o.id},'approved')"  style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--green);font-size:10px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer">✓ Approve</button>
+          <button onclick="updateOrderInline(${o.id},'cancelled')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--red);font-size:10px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer">✕ Cancel</button>
+        ` : ''}
+        ${isApproved ? `
+          <button onclick="updateOrderInline(${o.id},'completed')" style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);color:#818cf8;font-size:10px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer">✓ Complete</button>
+        ` : ''}
+        <button onclick="addOrderNote(${o.id})" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--muted);font-size:10px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer">📝 Note</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escO(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function updateOrderInline(id, status, notes) {
+  try {
+    const body = { admin_password: ORDERS_ADMIN_PASS, order_id: id, status };
+    if (notes !== undefined) body.admin_notes = notes;
+    const res  = await fetch(ORDERS_API, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error||'Failed');
+    const order = ordersData.find(o => o.id == id);
+    if (order) { if(status) order.status = status; if(notes!==undefined) order.admin_notes = notes; }
+    updateOrdersStats();
+    renderOrdersTab();
+    // flash toast
+    const t = document.getElementById('toast');
+    if(t){ t.textContent = notes !== undefined ? 'Note saved' : `Order #${id} → ${status.toUpperCase()}`; t.style.display='block'; setTimeout(()=>t.style.display='none',2500); }
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+function addOrderNote(id) {
+  const order = ordersData.find(o => o.id == id);
+  const current = order?.admin_notes || '';
+  const note = prompt(`Note for Order #${id}:`, current);
+  if (note !== null) updateOrderInline(id, order?.status||'pending', note);
+}
+
+// Auto-refresh orders every 60s when tab is open
+setInterval(() => {
+  const tab = document.getElementById('tab-orders');
+  if (tab && tab.classList.contains('active')) loadOrders();
+}, 60000);
 </script>
 </body>
 </html>
