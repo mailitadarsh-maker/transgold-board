@@ -637,7 +637,7 @@ async function fetchPrices(){
     if(d.ok && d.gold){
       spotUSD.gold   = d.gold;
       spotUSD.silver = d.silver;
-      if(d.spread){ MASTER = {...MASTER,...d.spread}; }
+      // do not overwrite MASTER from API spread
       updateDashboard();
       updatePreviews();
     }
