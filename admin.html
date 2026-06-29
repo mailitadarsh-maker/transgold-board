@@ -446,6 +446,7 @@ function doAuth(){
   const pw = document.getElementById('authPw').value;
   if(pw === ADMIN_PASS){
     document.getElementById('authScreen').style.display = 'none';
+    sessionStorage.setItem('tg_auth','1');
     document.getElementById('app').style.display = 'flex';
     init();
   } else {
@@ -454,9 +455,11 @@ function doAuth(){
   }
 }
 document.getElementById('authPw').addEventListener('keydown', e => { if(e.key==='Enter') doAuth(); });
+if(sessionStorage.getItem('tg_auth')==='1'){ document.getElementById('authScreen').style.display='none'; }
 
 function doLogout(){
   document.getElementById('app').style.display = 'none';
+  sessionStorage.removeItem('tg_auth');
   document.getElementById('authScreen').style.display = 'flex';
   document.getElementById('authPw').value = '';
 }
