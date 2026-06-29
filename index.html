@@ -1252,10 +1252,8 @@ async function fetchLivePrices() {
       const hg = document.getElementById('hGold');
       const hs = document.getElementById('hSilver');
       // Header shows spread-adjusted USD/oz (MASTER AED/gram → USD/oz)
-      const goldDisplayUSD = d.gold + (MASTER.goldAsk * WEIGHT_GM.gold[0]) / (WEIGHT.gold[0] * AED * PURITY.gold[0]);
-      const silvDisplayUSD = d.silver + (MASTER.silverAsk * WEIGHT_GM.silver[0]) / (WEIGHT.silver[0] * AED);
-      if (hg) hg.textContent = goldDisplayUSD.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
-      if (hs) hs.textContent = silvDisplayUSD.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if (hg) hg.textContent = d.gold.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if (hs) hs.textContent = d.silver.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
       const gDiff = (d.gold - prevGold).toFixed(2);
       const sDiff = (d.silver - prevSilver).toFixed(2);
       if (hg && hg.nextElementSibling) {
