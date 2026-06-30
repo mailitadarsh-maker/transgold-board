@@ -1368,7 +1368,7 @@ function toast(msg,type){
 // ── LIVE PRICE FETCH ──────────────────────────────────────────────────────────
 async function fetchLivePrices() {
   try {
-    const r = await fetch('live_prices.json?t=' + Date.now());
+    const r = await fetch('prices.php?t=' + Date.now());
     const d = await r.json();
     if (d.ok && d.gold) {
       const prevGold   = spotUSD.gold;
