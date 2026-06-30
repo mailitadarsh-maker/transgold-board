@@ -1399,17 +1399,22 @@ async function fetchLivePrices() {
       renderRows(PRICES.gold,   'goldRows',   'gold');
       renderRows(PRICES.silver, 'silverRows', 'silver');
       renderUnifiedTable();
+      const usp = d.usdSpread || {goldBuy:0,goldSell:0,silverBuy:0,silverSell:0};
+      const goldBuyPrice    = d.gold   + (usp.goldBuy   || 0);
+      const goldSellPrice   = d.gold   + (usp.goldSell  || 0);
+      const silverBuyPrice  = d.silver + (usp.silverBuy || 0);
+      const silverSellPrice = d.silver + (usp.silverSell|| 0);
       const hg = document.getElementById('hGold');
       const hs = document.getElementById('hSilver');
-      // Header shows spread-adjusted USD/oz (MASTER AED/gram → USD/oz)
-      if (hg) hg.textContent = d.gold.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
-      if (hs) hs.textContent = d.silver.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
-      const gDiff = (d.gold - prevGold).toFixed(2);
-      const sDiff = (d.silver - prevSilver).toFixed(2);
+      // Header shows USD-spread-adjusted Buy price (public board never shows raw live price)
+      if (hg) hg.textContent = goldBuyPrice.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if (hs) hs.textContent = silverBuyPrice.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+      const gDiff = (goldBuyPrice - prevGold).toFixed(2);
+      const sDiff = (silverBuyPrice - prevSilver).toFixed(2);
       const goldUp = parseFloat(gDiff) >= 0;
       const silverUp = parseFloat(sDiff) >= 0;
-      if (hg) { animateNumber(hg, d.gold, 2); glowPulse(hg, goldUp); }
-      if (hs) { animateNumber(hs, d.silver, 2); glowPulse(hs, silverUp); }
+      if (hg) { animateNumber(hg, goldBuyPrice, 2); glowPulse(hg, goldUp); }
+      if (hs) { animateNumber(hs, silverBuyPrice, 2); glowPulse(hs, silverUp); }
       if (hg && hg.nextElementSibling) {
         hg.nextElementSibling.textContent = (goldUp ? String.fromCharCode(9650) : String.fromCharCode(9660)) + ' ' + Math.abs(gDiff);
         hg.nextElementSibling.className = 'spot-chg ' + (goldUp ? 'up' : 'down');
@@ -1437,12 +1442,11 @@ async function fetchLivePrices() {
       if (bgh && typeof d.goldHigh === 'number')  bgh.textContent = d.goldHigh.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
       if (bsl && typeof d.silverLow === 'number') bsl.textContent = d.silverLow.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
       if (bsh && typeof d.silverHigh === 'number') bsh.textContent = d.silverHigh.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
-      // Sidebar shows the clean USD/oz spot price — no AED spread applied here.
-      // Spread (MASTER/override) only ever affects the AED commodity table via calcPrices().
-      const gBuyUSD  = d.gold;
-      const gSellUSD = d.gold;
-      const sBuyUSD  = d.silver;
-      const sSellUSD = d.silver;
+      // Sidebar shows USD-spread-adjusted Buy/Sell (separate from AED commodity table spread)
+      const gBuyUSD  = goldBuyPrice;
+      const gSellUSD = goldSellPrice;
+      const sBuyUSD  = silverBuyPrice;
+      const sSellUSD = silverSellPrice;
       if (bg)  { animateNumber(bg,  gBuyUSD,  2); glowPulse(bg,  goldUp); }
       if (bgs) { animateNumber(bgs, gSellUSD, 2); glowPulse(bgs, goldUp); }
       if (bs)  { animateNumber(bs,  sBuyUSD,  2); glowPulse(bs,  silverUp); }

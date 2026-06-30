@@ -17,5 +17,11 @@
             null,
             null
         ]
+    },
+    "usd": {
+        "goldBuy": 0,
+        "goldSell": 0,
+        "silverBuy": 0,
+        "silverSell": 0
     }
 }

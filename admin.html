@@ -420,6 +420,34 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <div class="toast" id="toast"></div>
 
 <script>
+(function(){
+  function buildUsdCard(){
+    const page = document.getElementById('page-prices');
+    if (!page || document.getElementById('usdSpreadCard')) return;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'usdSpreadCard';
+    card.innerHTML = `
+      <div class="card-title">USD Spread (Direct $ Adjustment — independent of AED spread)</div>
+      <div class="spread-grid">
+        <div><div class="field-lbl">Gold Buy ($)</div><input type="number" step="0.01" class="field-input green" id="usdGoldBuy" value="0" oninput="updatePreviews()"></div>
+        <div><div class="field-lbl">Gold Sell ($)</div><input type="number" step="0.01" class="field-input red-c" id="usdGoldSell" value="0" oninput="updatePreviews()"></div>
+        <div><div class="field-lbl">Silver Buy ($)</div><input type="number" step="0.01" class="field-input green" id="usdSilverBuy" value="0" oninput="updatePreviews()"></div>
+        <div><div class="field-lbl">Silver Sell ($)</div><input type="number" step="0.01" class="field-input red-c" id="usdSilverSell" value="0" oninput="updatePreviews()"></div>
+      </div>
+      <div class="hint">Adjusts the USD/oz live spot price directly. Used for the public board's USD price display. Separate from the AED commodity table spread above.</div>
+      <div class="price-bar" style="margin-top:14px">
+        <div class="price-box"><div class="price-box-lbl">Gold — Live vs Spread (USD)</div><div class="price-box-val" id="usdGoldLiveLine" style="font-size:14px;color:var(--text)">Live: — | Buy: — | Sell: —</div></div>
+        <div class="price-box"><div class="price-box-lbl">Silver — Live vs Spread (USD)</div><div class="price-box-val" id="usdSilverLiveLine" style="font-size:14px;color:var(--text)">Live: — | Buy: — | Sell: —</div></div>
+      </div>
+      <div class="save-bar"><button class="btn btn-gold" onclick="saveSpread()">SAVE ALL SPREAD SETTINGS</button></div>`;
+    page.appendChild(card);
+  }
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(buildUsdCard, 50); });
+  if (document.readyState !== 'loading') setTimeout(buildUsdCard, 50);
+})();
+</script>
+<script>
 const ADMIN_PASS = 'admin2024';
 const AED = 3.6725;
 const TROY = 31.1035;
@@ -431,6 +459,7 @@ const SILVER_ROWS = ['999·1KG','999·TTB'];
 
 let spotUSD = { gold:4090.02, silver:59.255 };
 let MASTER  = { goldBid:-5, goldAsk:5, silverBid:0, silverAsk:0 };
+let USD_SPREAD = { goldBuy:0, goldSell:0, silverBuy:0, silverSell:0 };
 let OVERRIDE = { gold:[null,null,null,null,null], silver:[null,null] };
 let ordersData = [];
 let mediaSlots = [null,null,null];
@@ -528,6 +557,14 @@ function updatePreviews(){
       if(ps) ps.textContent = fmt(mid+bid);
     }
   });
+  const ugb = parseFloat(document.getElementById('usdGoldBuy')?.value)||0;
+  const ugs = parseFloat(document.getElementById('usdGoldSell')?.value)||0;
+  const usb = parseFloat(document.getElementById('usdSilverBuy')?.value)||0;
+  const uss = parseFloat(document.getElementById('usdSilverSell')?.value)||0;
+  const goldLine = document.getElementById('usdGoldLiveLine');
+  const silverLine = document.getElementById('usdSilverLiveLine');
+  if (goldLine) goldLine.innerHTML = `Live: $${spotUSD.gold.toFixed(2)} &nbsp;|&nbsp; Buy: $${(spotUSD.gold+ugb).toFixed(2)} &nbsp;|&nbsp; Sell: $${(spotUSD.gold+ugs).toFixed(2)}`;
+  if (silverLine) silverLine.innerHTML = `Live: $${spotUSD.silver.toFixed(2)} &nbsp;|&nbsp; Buy: $${(spotUSD.silver+usb).toFixed(2)} &nbsp;|&nbsp; Sell: $${(spotUSD.silver+uss).toFixed(2)}`;
   updateDashboard();
 }
 
@@ -572,6 +609,10 @@ function saveSpread(){
   MASTER.goldAsk   = parseFloat(document.getElementById('masterGoldAsk').value)||0;
   MASTER.silverBid = parseFloat(document.getElementById('masterSilverBid').value)||0;
   MASTER.silverAsk = parseFloat(document.getElementById('masterSilverAsk').value)||0;
+  USD_SPREAD.goldBuy    = parseFloat(document.getElementById('usdGoldBuy').value)||0;
+  USD_SPREAD.goldSell   = parseFloat(document.getElementById('usdGoldSell').value)||0;
+  USD_SPREAD.silverBuy  = parseFloat(document.getElementById('usdSilverBuy').value)||0;
+  USD_SPREAD.silverSell = parseFloat(document.getElementById('usdSilverSell').value)||0;
   ['gold','silver'].forEach(type=>{
     const count = type==='gold'?5:2;
     for(let i=0;i<count;i++){
@@ -586,7 +627,7 @@ function saveSpread(){
   });
   fetch('/save_spread.php',{
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({master:MASTER, override:OVERRIDE})
+    body: JSON.stringify({master:MASTER, override:OVERRIDE, usd:USD_SPREAD})
   }).then(r=>r.json()).then(d=>toast(d.ok?'✓ Saved — all devices updated':'⚠ Save failed','ok'))
     .catch(()=>toast('⚠ Could not reach server','err'));
 }
@@ -603,6 +644,13 @@ async function loadSpread(){
       document.getElementById('masterGoldAsk').value   = d.master.goldAsk;
       document.getElementById('masterSilverBid').value = d.master.silverBid;
       document.getElementById('masterSilverAsk').value = d.master.silverAsk;
+    }
+    if(d.usd){
+      USD_SPREAD = {...USD_SPREAD, ...d.usd};
+      document.getElementById('usdGoldBuy').value    = d.usd.goldBuy;
+      document.getElementById('usdGoldSell').value   = d.usd.goldSell;
+      document.getElementById('usdSilverBuy').value  = d.usd.silverBuy;
+      document.getElementById('usdSilverSell').value = d.usd.silverSell;
     }
     if(d.override){
       ['gold','silver'].forEach(type=>{
