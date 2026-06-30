@@ -1763,10 +1763,8 @@ function renderUnifiedTable(){
     const safe = (arr, i) => (arr && arr[i]) ? arr[i] : { buy:0, sell:0 };
 
     const rows = [
-      { label:'GOLD',   badge:'24 CARAT', weight:'1 GM',  src: safe(g,2), cls:'' },
       { label:'GOLD',   badge:'9999',     weight:'1 KG',  src: safe(g,0), cls:'' },
       { label:'GOLD',   badge:'TTB',      weight:'1 TTB', src: safe(g,4), cls:'' },
-      { label:'SILVER', badge:'',         weight:'1 KG',  src: safe(s,0), cls:'silver' },
       { label:'GOLD',   badge:'995',      weight:'1 KG',  src: safe(g,1), cls:'' }];
 
     el.innerHTML = rows.map(r => `
