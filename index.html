@@ -347,6 +347,25 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
 .ut-buy{font-size:28px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
 .ut-sell{font-size:28px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
 
+/* ===== UNIFIED TABLE — MOBILE ≤580px (2-col card layout) ===== */
+@media(max-width:580px){
+  .ut-wrap{padding:10px 14px 10px 14px !important}
+  .ut-head{display:none}
+  .ut-row{
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:auto auto;
+    gap:6px 0;
+    padding:12px 14px;
+  }
+  .ut-name{grid-column:1;grid-row:1;font-size:17px}
+  .ut-name small{font-size:11px}
+  .ut-weight{grid-column:2;grid-row:1;text-align:right;font-size:13px;align-self:center}
+  .ut-buy{grid-column:1;grid-row:2;font-size:17px;position:relative;padding-top:14px}
+  .ut-sell{grid-column:2;grid-row:2;text-align:right;font-size:17px;position:relative;padding-top:14px}
+  .ut-buy::before{content:'BUY';position:absolute;top:0;left:0;font-size:8px;font-weight:700;letter-spacing:.08em;color:var(--gold);opacity:.75}
+  .ut-sell::before{content:'SELL';position:absolute;top:0;right:0;font-size:8px;font-weight:700;letter-spacing:.08em;color:var(--gold);opacity:.75}
+}
+
 
 /* ===== FINAL POLISH: square corners + green gradient borders ===== */
 :root{
