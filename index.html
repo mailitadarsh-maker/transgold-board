@@ -1699,6 +1699,20 @@ setInterval(updateClock,1000);
 setInterval(updatePrices,2000);
 setInterval(fetchLivePrices, 8*1000); // refresh every 8s
 
+// Safety net: force a full page reload every 60s so the board can never get
+// permanently stuck showing a stale price if the live fetch loop stalls for
+// any reason (browser hiccup, long-uptime memory drift, a fetch that quietly
+// keeps failing). Skipped while someone has a form field focused (e.g. the
+// embedded admin/orders panel on this page) so an in-progress edit is never
+// wiped out mid-typing.
+setInterval(function(){
+  const active = document.activeElement;
+  const isEditing = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT');
+  if (!isEditing) {
+    location.reload();
+  }
+}, 60*1000);
+
 // ── ORDERS TAB ────────────────────────────────────────────────────────────────
 const ORDERS_API = '/api/orders.php';
 const ORDERS_ADMIN_PASS = 'admin2024';
