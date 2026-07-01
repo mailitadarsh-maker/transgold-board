@@ -305,27 +305,56 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
 .spot-pill.gpill{background:rgba(212,169,74,.15);color:var(--gold);border:1px solid rgba(212,169,74,.4)}
 
 
-/* ===== SPOT RATE — big box style (Boonway reference) ===== */
+/* ===== SPOT RATE — trading-ticket redesign ===== */
 .sr-wrap{padding:14px 16px;display:flex;flex-direction:column;gap:14px;flex:1;overflow-y:auto}
 .sr-title{background:none;color:var(--gold);font-weight:800;
   font-size:18px;letter-spacing:.22em;text-align:center;padding:8px 0 4px;text-transform:uppercase;border-bottom:1px solid var(--border-gold)}
-.sr-block{border-radius:10px;overflow:hidden;border:1px solid var(--border-gold);background:transparent;flex:1;display:flex;flex-direction:column}
-.sr-hdr{color:#fff;text-align:center;
-  font-weight:800;font-size:15px;letter-spacing:.18em;padding:10px 0;text-transform:uppercase;border-radius:8px 8px 0 0}
-.sr-hdr.gold-hdr{background:linear-gradient(90deg,var(--gold),#8a6a1f);color:#1a1505}
-.sr-hdr.silver-hdr{background:linear-gradient(90deg,var(--silver),#7c8694);color:#15191f}
-.sr-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;justify-content:center}
-.sr-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:8px}
-.sr-lbl{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--gold);margin-bottom:6px}
-.sr-lbl .dollar{background:var(--gold);color:#1a1505;width:20px;height:20px;border-radius:5px;
-  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
-.sr-pill{background:linear-gradient(180deg,#2EBE6E,#1FA85C);color:#fff;font-weight:800;
-  font-size:clamp(22px,3vw,30px);text-align:center;padding:10px 6px;border-radius:8px;font-variant-numeric:tabular-nums}
-.sr-hilo{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px}
-.sr-tag{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--text)}
-.sr-tag .badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:5px;color:#fff}
-.sr-tag .low{background:#D64545}
-.sr-tag .high{background:#2EBE6E}
+.sr-block{border-radius:10px;overflow:hidden;border:1px solid var(--border-gold);background:var(--bg2);flex:1;display:flex;flex-direction:column;
+  box-shadow:0 8px 20px -12px rgba(0,0,0,.6)}
+
+/* Header: icon + name + live dot on the left, day-change badge on the right */
+.sr-hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-radius:8px 8px 0 0}
+.sr-hdr.gold-hdr{background:linear-gradient(90deg,var(--gold),#8a6a1f)}
+.sr-hdr.silver-hdr{background:linear-gradient(90deg,var(--silver),#7c8694)}
+.sr-hdr-left{display:flex;align-items:center;gap:8px}
+.sr-hdr-icon{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.sr-hdr-icon svg{width:100%;height:100%;display:block}
+.sr-hdr-name{font-weight:800;font-size:14px;letter-spacing:.16em;text-transform:uppercase}
+.gold-hdr .sr-hdr-name{color:#1a1505}
+.silver-hdr .sr-hdr-name{color:#15191f}
+.sr-live-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;animation:sr-blink 1.8s ease-in-out infinite}
+.gold-hdr .sr-live-dot{color:#1a1505}
+.silver-hdr .sr-live-dot{color:#15191f}
+@keyframes sr-blink{0%,100%{opacity:.3}50%{opacity:1}}
+.sr-hdr-chg{font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;background:rgba(0,0,0,.16);font-variant-numeric:tabular-nums;white-space:nowrap}
+.gold-hdr .sr-hdr-chg{color:#1a1505}
+.silver-hdr .sr-hdr-chg{color:#15191f}
+
+.sr-body{padding:16px 16px 18px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px}
+
+/* Buy / Sell tickets — distinct accent colors instead of two identical green pills */
+.sr-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sr-ticket{position:relative;background:var(--bg3);border-radius:6px;padding:10px 12px 10px 16px;overflow:hidden}
+.sr-ticket::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.sr-ticket.buy::before{background:var(--green)}
+.sr-ticket.sell::before{background:var(--gold)}
+.sr-lbl{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.sr-lbl .dollar{width:15px;height:15px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0}
+.sr-ticket.buy .sr-lbl .dollar{background:rgba(34,197,94,.18);color:var(--green)}
+.sr-ticket.sell .sr-lbl .dollar{background:rgba(212,169,74,.2);color:var(--gold)}
+.sr-pill{background:none;color:var(--text);font-weight:800;font-size:clamp(19px,2.5vw,26px);
+  text-align:left;padding:0;font-variant-numeric:tabular-nums;line-height:1.1}
+
+/* Day range bar — replaces the flat Low/High tags with an actual visual range + live position marker */
+.sr-range{display:flex;flex-direction:column;gap:7px}
+.sr-range-track{position:relative;height:5px;border-radius:6px;background:linear-gradient(90deg,#D64545,#D4A94A 50%,#2EBE6E)}
+.sr-range-marker{position:absolute;top:50%;left:50%;width:11px;height:11px;border-radius:50%;background:#fff;
+  border:2px solid var(--bg2);box-shadow:0 0 0 1px rgba(255,255,255,.4),0 2px 5px rgba(0,0,0,.5);
+  transform:translate(-50%,-50%);transition:left .6s ease}
+.sr-range-labels{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;font-weight:700;letter-spacing:.02em}
+.sr-range-labels .lo{color:#D64545}
+.sr-range-labels .hi{color:#2EBE6E}
+.sr-range-labels b{color:var(--text);font-variant-numeric:tabular-nums;font-weight:800;margin-left:4px}
 
 
 /* ===== UNIFIED TABLE — single 5-row board (photo reference) ===== */
@@ -506,44 +535,62 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
       <div class="sr-title">Spot Rate</div>
 
       <div class="sr-block">
-        <div class="sr-hdr gold-hdr">Gold</div>
+        <div class="sr-hdr gold-hdr">
+          <div class="sr-hdr-left">
+            <span class="sr-hdr-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8h16l-2.5 10h-11L4 8z" fill="#1a1505" opacity=".85"/><path d="M4 8h16l-2.5 10h-11L4 8z" stroke="#1a1505" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.3 8L8 5h8l1.7 3" stroke="#1a1505" stroke-width="1.3" stroke-linejoin="round" fill="none"/></svg></span>
+            <span class="sr-hdr-name">Gold</span>
+            <span class="sr-live-dot"></span>
+          </div>
+          <span class="sr-hdr-chg" id="bGoldChg">&#9650; 1.55</span>
+        </div>
         <div class="sr-body">
           <div class="sr-cols">
-            <div>
+            <div class="sr-ticket buy">
               <div class="sr-lbl"><span class="dollar">$</span>Buy OZ</div>
               <div class="sr-pill" id="bGoldBuy">4,046.73</div>
             </div>
-            <div>
+            <div class="sr-ticket sell">
               <div class="sr-lbl"><span class="dollar">$</span>Sell OZ</div>
               <div class="sr-pill" id="bGoldSell">4,047.73</div>
             </div>
           </div>
-          <div class="sr-hilo">
-            <div class="sr-tag"><span class="badge low">Low</span><span id="bGoldLow">4,000.09</span></div>
-            <div class="sr-tag"><span class="badge high">High</span><span id="bGoldHigh">4,086.52</span></div>
+          <div class="sr-range">
+            <div class="sr-range-track"><div class="sr-range-marker" id="bGoldRangeMarker"></div></div>
+            <div class="sr-range-labels">
+              <span class="lo">Low<b id="bGoldLow">4,000.09</b></span>
+              <span class="hi">High<b id="bGoldHigh">4,086.52</b></span>
+            </div>
           </div>
-          <div class="chg-line up" id="bGoldChg" style="margin-top:8px;text-align:center">&#9650; 1.55</div>
         </div>
       </div>
 
       <div class="sr-block">
-        <div class="sr-hdr silver-hdr">Silver</div>
+        <div class="sr-hdr silver-hdr">
+          <div class="sr-hdr-left">
+            <span class="sr-hdr-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8h16l-2.5 10h-11L4 8z" fill="#15191f" opacity=".85"/><path d="M4 8h16l-2.5 10h-11L4 8z" stroke="#15191f" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.3 8L8 5h8l1.7 3" stroke="#15191f" stroke-width="1.3" stroke-linejoin="round" fill="none"/></svg></span>
+            <span class="sr-hdr-name">Silver</span>
+            <span class="sr-live-dot"></span>
+          </div>
+          <span class="sr-hdr-chg" id="bSilverChg">&#9650; 0.03</span>
+        </div>
         <div class="sr-body">
           <div class="sr-cols">
-            <div>
+            <div class="sr-ticket buy">
               <div class="sr-lbl"><span class="dollar">$</span>Buy OZ</div>
               <div class="sr-pill" id="bSilverBuy">58.08</div>
             </div>
-            <div>
+            <div class="sr-ticket sell">
               <div class="sr-lbl"><span class="dollar">$</span>Sell OZ</div>
               <div class="sr-pill" id="bSilverSell">58.11</div>
             </div>
           </div>
-          <div class="sr-hilo">
-            <div class="sr-tag"><span class="badge low">Low</span><span id="bSilverLow">57.41</span></div>
-            <div class="sr-tag"><span class="badge high">High</span><span id="bSilverHigh">59.49</span></div>
+          <div class="sr-range">
+            <div class="sr-range-track"><div class="sr-range-marker" id="bSilverRangeMarker"></div></div>
+            <div class="sr-range-labels">
+              <span class="lo">Low<b id="bSilverLow">57.41</b></span>
+              <span class="hi">High<b id="bSilverHigh">59.49</b></span>
+            </div>
           </div>
-          <div class="chg-line up" id="bSilverChg" style="margin-top:8px;text-align:center">&#9650; 0.03</div>
         </div>
       </div>
 
@@ -1426,8 +1473,8 @@ async function fetchLivePrices() {
       // Sync sidebar chg-line with same diff
       const bgc = document.getElementById('bGoldChg');
       const bsc = document.getElementById('bSilverChg');
-      if (bgc) { bgc.textContent=(goldUp?'▲':'▼')+' '+Math.abs(gDiff); bgc.className='chg-line '+(goldUp?'up':'down'); }
-      if (bsc) { bsc.textContent=(silverUp?'▲':'▼')+' '+Math.abs(sDiff); bsc.className='chg-line '+(silverUp?'up':'down'); }
+      if (bgc) { bgc.textContent=(goldUp?'▲':'▼')+' '+Math.abs(gDiff); bgc.style.color = goldUp ? '#0f5c2e' : '#7a1f1f'; }
+      if (bsc) { bsc.textContent=(silverUp?'▲':'▼')+' '+Math.abs(sDiff); bsc.style.color = silverUp ? '#0f5c2e' : '#7a1f1f'; }
       updateAdminLivePrices();
       // update right panel boxes with rolling number + glow pulse effect
       const bg = document.getElementById('bGoldBuy');
@@ -1442,6 +1489,12 @@ async function fetchLivePrices() {
       if (bgh && typeof d.goldHigh === 'number')  bgh.textContent = d.goldHigh.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
       if (bsl && typeof d.silverLow === 'number') bsl.textContent = d.silverLow.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
       if (bsh && typeof d.silverHigh === 'number') bsh.textContent = d.silverHigh.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
+      if (typeof d.goldLow === 'number' && typeof d.goldHigh === 'number') {
+        setRangeMarker('bGoldRangeMarker', d.goldLow, d.goldHigh, goldBuyPrice);
+      }
+      if (typeof d.silverLow === 'number' && typeof d.silverHigh === 'number') {
+        setRangeMarker('bSilverRangeMarker', d.silverLow, d.silverHigh, silverBuyPrice);
+      }
       // Sidebar shows USD-spread-adjusted Buy/Sell (separate from AED commodity table spread)
       const gBuyUSD  = goldBuyPrice;
       const gSellUSD = goldSellPrice;
@@ -1458,6 +1511,16 @@ async function fetchLivePrices() {
 }
 
 
+function setRangeMarker(id, low, high, current){
+  const el = document.getElementById(id);
+  if (!el) return;
+  let pct = 50;
+  if (high > low) {
+    pct = ((current - low) / (high - low)) * 100;
+    pct = Math.max(2, Math.min(98, pct));
+  }
+  el.style.left = pct + '%';
+}
 function animateNumber(el, newVal, decimals){
   if (!el) return;
   const old = parseFloat((el.textContent||'0').replace(/,/g,'')) || 0;
