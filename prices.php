@@ -11,10 +11,10 @@ $json = json_decode(file_get_contents($localFile), true);
 if (file_exists($spreadFile)) {
     $spread = json_decode(file_get_contents($spreadFile), true);
     $json['spread'] = [
-        'goldBid'   => $spread['goldBid']   ?? 0,
-        'goldAsk'   => $spread['goldAsk']   ?? 0,
-        'silverBid' => $spread['silverBid'] ?? 0,
-        'silverAsk' => $spread['silverAsk'] ?? 0,
+        'goldBid'   => $spread['master']['goldBid']   ?? 0,
+        'goldAsk'   => $spread['master']['goldAsk']   ?? 0,
+        'silverBid' => $spread['master']['silverBid'] ?? 0,
+        'silverAsk' => $spread['master']['silverAsk'] ?? 0,
     ];
     $json['usdSpread'] = [
         'goldBuy'    => $spread['usd']['goldBuy']    ?? 0,
