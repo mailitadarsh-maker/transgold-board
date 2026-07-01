@@ -5,8 +5,17 @@ header('Cache-Control: no-store');
 
 $localFile = __DIR__ . '/prices.json';
 $spreadFile = __DIR__ . '/spread.json';
+$hiloFile = __DIR__ . '/daily_hilo.json';
 
 $json = json_decode(file_get_contents($localFile), true);
+
+if (file_exists($hiloFile)) {
+    $hilo = json_decode(file_get_contents($hiloFile), true);
+    $json['goldLow']    = $hilo['goldLow']    ?? $json['gold'];
+    $json['goldHigh']   = $hilo['goldHigh']   ?? $json['gold'];
+    $json['silverLow']  = $hilo['silverLow']  ?? $json['silver'];
+    $json['silverHigh'] = $hilo['silverHigh'] ?? $json['silver'];
+}
 
 if (file_exists($spreadFile)) {
     $spread = json_decode(file_get_contents($spreadFile), true);
