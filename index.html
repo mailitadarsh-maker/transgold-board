@@ -368,13 +368,30 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
 .ut-head span small{font-size:10px;font-weight:700;opacity:.75;margin-left:4px}
 .ut-row{width:100%;display:grid;grid-template-columns:1.6fr 1fr 1.1fr 1.1fr;align-items:center;
   background:var(--bg3);border:1px solid var(--border-blue,rgba(63,169,224,.3));
-  border-radius:8px;padding:16px 20px;margin-bottom:10px}
+  border-radius:8px;padding:16px 20px;margin-bottom:10px;position:relative;overflow:hidden}
+/* Gold top accent instead of a flat all-around border */
+.ut-row::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--gold),#f0d68a,var(--gold));opacity:.85}
+
+.ut-name-cell{display:flex;align-items:center;gap:10px}
+.ut-icon{width:34px;height:34px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  background:rgba(212,169,74,.12);border:1px solid rgba(212,169,74,.32)}
+.ut-icon svg{width:19px;height:19px;display:block}
 .ut-name{font-size:26px;font-weight:800;color:var(--text)}
 .ut-name small{font-size:13px;font-weight:700;color:var(--gold);margin-left:8px}
 .ut-name.silver small{color:var(--silver)}
+.ut-live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;animation:sr-blink 1.8s ease-in-out infinite}
+
 .ut-weight{font-size:20px;font-weight:700;color:var(--text)}
-.ut-buy{font-size:28px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
-.ut-sell{font-size:28px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+
+.ut-price-col{display:flex;flex-direction:column;gap:5px}
+.ut-buy-pill,.ut-sell-pill{border-radius:6px;padding:8px 12px}
+.ut-buy-pill{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.28)}
+.ut-sell-pill{background:rgba(212,169,74,.1);border:1px solid rgba(212,169,74,.3)}
+.ut-buy{font-size:26px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;display:block}
+.ut-sell{font-size:26px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;display:block}
+.ut-sub{font-size:11.5px;font-weight:700;letter-spacing:.03em;color:var(--muted);padding-left:2px}
+.ut-sub b{color:var(--text);font-variant-numeric:tabular-nums;font-weight:800;margin-left:3px}
 
 /* ===== UNIFIED TABLE — MOBILE ≤580px (2-col card layout) ===== */
 @media(max-width:580px){
@@ -383,16 +400,20 @@ body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',Inter,s
   .ut-row{
     grid-template-columns:1fr 1fr;
     grid-template-rows:auto auto;
-    gap:6px 0;
-    padding:12px 14px;
+    gap:8px 0;
+    padding:14px 14px 12px;
   }
-  .ut-name{grid-column:1;grid-row:1;font-size:17px}
+  .ut-name-cell{grid-column:1;grid-row:1}
+  .ut-icon{width:26px;height:26px}
+  .ut-icon svg{width:15px;height:15px}
+  .ut-name{font-size:17px}
   .ut-name small{font-size:11px}
   .ut-weight{grid-column:2;grid-row:1;text-align:right;font-size:13px;align-self:center}
-  .ut-buy{grid-column:1;grid-row:2;font-size:17px;position:relative;padding-top:14px}
-  .ut-sell{grid-column:2;grid-row:2;text-align:right;font-size:17px;position:relative;padding-top:14px}
-  .ut-buy::before{content:'BUY';position:absolute;top:0;left:0;font-size:8px;font-weight:700;letter-spacing:.08em;color:var(--gold);opacity:.75}
-  .ut-sell::before{content:'SELL';position:absolute;top:0;right:0;font-size:8px;font-weight:700;letter-spacing:.08em;color:var(--gold);opacity:.75}
+  .ut-price-col.buy{grid-column:1;grid-row:2}
+  .ut-price-col.sell{grid-column:2;grid-row:2;align-items:flex-end}
+  .ut-buy,.ut-sell{font-size:17px}
+  .ut-buy-pill,.ut-sell-pill{padding:6px 10px}
+  .ut-sub{font-size:10px}
 }
 
 
@@ -1823,19 +1844,33 @@ function renderUnifiedTable(){
       v = Number(v) || 0;
       return v.toLocaleString('en',{minimumFractionDigits: v < 1000 ? 2 : 0, maximumFractionDigits: v < 1000 ? 2 : 0});
     };
+    const fmtGram = v => (Number(v)||0).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
     const safe = (arr, i) => (arr && arr[i]) ? arr[i] : { buy:0, sell:0 };
 
+    const cubeIcon = '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" stroke="#D4A94A" stroke-width="1.3" stroke-linejoin="round" fill="rgba(212,169,74,.12)"/><path d="M12 3v9M4 7.5l8 4.5 8-4.5" stroke="#D4A94A" stroke-width="1.1" stroke-linejoin="round"/></svg>';
+    const diamondIcon = '<svg viewBox="0 0 24 24" fill="none"><path d="M6 8l3-4h6l3 4-8 12-4-12z" stroke="#D4A94A" stroke-width="1.3" stroke-linejoin="round" fill="rgba(212,169,74,.12)"/><path d="M6 8h12M9 4l1.5 4M15 4l-1.5 4" stroke="#D4A94A" stroke-width="1" stroke-linejoin="round"/></svg>';
+
     const rows = [
-      { label:'GOLD',   badge:'9999',     weight:'1 KG',  src: safe(g,0), cls:'' },
-      { label:'GOLD',   badge:'TTB',      weight:'1 TTB', src: safe(g,4), cls:'' },
-      { label:'GOLD',   badge:'995',      weight:'1 KG',  src: safe(g,1), cls:'' }];
+      { label:'GOLD',   badge:'9999',     weight:'1 KG',  grams:1000,   icon:cubeIcon,    src: safe(g,0), cls:'' },
+      { label:'GOLD',   badge:'TTB',      weight:'1 TTB', grams:116.64, icon:diamondIcon, src: safe(g,4), cls:'' },
+      { label:'GOLD',   badge:'995',      weight:'1 KG',  grams:1000,   icon:cubeIcon,    src: safe(g,1), cls:'' }];
 
     el.innerHTML = rows.map(r => `
       <div class="ut-row">
-        <div class="ut-name ${r.cls}">${r.label}${r.badge ? ' <small>'+r.badge+'</small>' : ''}</div>
+        <div class="ut-name-cell">
+          <span class="ut-icon">${r.icon}</span>
+          <div class="ut-name ${r.cls}">${r.label}${r.badge ? ' <small>'+r.badge+'</small>' : ''}</div>
+          <span class="ut-live-dot"></span>
+        </div>
         <div class="ut-weight">${r.weight}</div>
-        <div class="ut-buy">${fmt(r.src.buy)}</div>
-        <div class="ut-sell">${fmt(r.src.sell)}</div>
+        <div class="ut-price-col buy">
+          <div class="ut-buy-pill"><span class="ut-buy">${fmt(r.src.buy)}</span></div>
+          <div class="ut-sub">AED <b>${fmtGram(r.src.buy / r.grams)}</b>/g</div>
+        </div>
+        <div class="ut-price-col sell">
+          <div class="ut-sell-pill"><span class="ut-sell">${fmt(r.src.sell)}</span></div>
+          <div class="ut-sub">AED <b>${fmtGram(r.src.sell / r.grams)}</b>/g</div>
+        </div>
       </div>`).join('');
 
     // Rolling number + glow pulse per row (green=up, red=down) vs previous render
