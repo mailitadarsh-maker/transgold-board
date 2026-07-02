@@ -1121,13 +1121,13 @@ function calcPrices() {
   PRICES.gold.forEach((item, i) => {
     const purity = PURITY.gold[i] !== undefined ? PURITY.gold[i] : 1.0;
     const mid = spotUSD.gold * WEIGHT.gold[i] * AED * purity;
-    item.buy  = mid + ASK.gold[i];
-    item.sell = mid + BID.gold[i];
+    item.buy  = mid + BID.gold[i];
+    item.sell = mid + ASK.gold[i];
   });
   PRICES.silver.forEach((item, i) => {
     const mid = spotUSD.silver * WEIGHT.silver[i] * AED;
-    item.buy  = mid + ASK.silver[i];
-    item.sell = mid + BID.silver[i];
+    item.buy  = mid + BID.silver[i];
+    item.sell = mid + ASK.silver[i];
   });
 }
 
