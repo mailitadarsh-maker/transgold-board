@@ -198,6 +198,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       Orders
       <span class="sb-badge" id="sbOrderBadge">0</span>
     </div>
+    <div class="sb-item" onclick="navTo('customers',this);loadCustomers()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Customers
+    </div>
     <div class="sb-item" onclick="navTo('shop',this);loadShopInfo()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Shop Info
@@ -378,6 +382,26 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <div id="ordersList"><div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">Click Refresh to load orders</div></div>
       </div>
 
+      <!-- ── CUSTOMERS PAGE ── -->
+      <div class="page" id="page-customers">
+        <div class="orders-stats">
+          <div class="stat"><div class="stat-val" style="color:var(--gold)" id="cs-total">—</div><div class="stat-lbl">Total</div></div>
+          <div class="stat"><div class="stat-val" style="color:var(--green)" id="cs-verified">—</div><div class="stat-lbl">Verified</div></div>
+          <div class="stat"><div class="stat-val" style="color:var(--text);font-size:15px" id="cs-value">—</div><div class="stat-lbl">AED Value</div></div>
+        </div>
+        <div id="customersListWrap">
+          <div class="filter-bar">
+            <input type="text" class="filter-select" id="customersSearch" placeholder="Search name, phone, or email…" oninput="renderCustomers()" style="flex:1;min-width:180px">
+            <button class="btn btn-outline" onclick="loadCustomers()">↻ REFRESH</button>
+          </div>
+          <div id="customersList"><div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">Click Refresh to load customers</div></div>
+        </div>
+        <div id="customerDetail" style="display:none">
+          <button class="btn btn-outline" style="margin-bottom:14px" onclick="backToCustomerList()">← Back to Customers</button>
+          <div id="customerDetailBody"></div>
+        </div>
+      </div>
+
       <!-- ── SHOP PAGE ── -->
       <div class="page" id="page-shop">
         <div class="card">
@@ -488,7 +512,7 @@ function doLogout(){
 }
 
 // ── NAV ───────────────────────────────────────────────────────────────────────
-const PAGE_TITLES = { dashboard:'Dashboard', prices:'Prices & Spread', orders:'Orders', shop:'Shop Info', media:'Media' };
+const PAGE_TITLES = { dashboard:'Dashboard', prices:'Prices & Spread', orders:'Orders', customers:'Customers', shop:'Shop Info', media:'Media' };
 function navTo(name, el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
@@ -777,6 +801,119 @@ function renderOrders(){
       </div>
     </div>`;
   }).join('');
+}
+
+let customersData = [];
+
+async function loadCustomers(){
+  document.getElementById('customersList').innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">Loading…</div>';
+  try {
+    const r = await fetch('/api/customers.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({admin_password:ADMIN_PASS})});
+    const d = await r.json();
+    if(!d.success) throw new Error(d.error||'Failed');
+    customersData = d.customers||[];
+    const el = id=>document.getElementById(id);
+    if(el('cs-total'))    el('cs-total').textContent    = customersData.length;
+    if(el('cs-verified')) el('cs-verified').textContent = customersData.filter(c=>c.is_verified==1).length;
+    const totalVal = customersData.reduce((s,c)=>s+parseFloat(c.total_aed||0),0);
+    if(el('cs-value'))    el('cs-value').textContent    = 'AED '+Math.round(totalVal).toLocaleString();
+    renderCustomers();
+  } catch(e){
+    document.getElementById('customersList').innerHTML = '<div style="text-align:center;padding:40px;color:var(--red);font-size:12px">Failed: '+e.message+'</div>';
+  }
+}
+
+function renderCustomers(){
+  const q = (document.getElementById('customersSearch').value||'').toLowerCase().trim();
+  const list = !q ? customersData : customersData.filter(c=>
+    (c.name||'').toLowerCase().includes(q) ||
+    (c.phone||'').toLowerCase().includes(q) ||
+    (c.email||'').toLowerCase().includes(q)
+  );
+  const cont = document.getElementById('customersList');
+  if(!list.length){ cont.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">No customers</div>'; return; }
+  cont.innerHTML = list.map(c=>{
+    const dt = c.last_order_at ? new Date(c.last_order_at).toLocaleString('en-AE',{dateStyle:'short',timeStyle:'short'}) : 'No orders yet';
+    const val = parseFloat(c.total_aed||0).toLocaleString('en-AE',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const vc = c.is_verified==1 ? 'var(--green)' : '#fbbf24';
+    return `<div class="order-card" style="border-left-color:${vc};cursor:pointer" onclick="showCustomerDetail(${c.id})">
+      <div class="order-hdr">
+        <div><span class="order-name">${esc(c.name||'Unknown')}</span><span class="order-phone">${esc(c.phone||'')}</span></div>
+        <span class="status-pill" style="background:${vc}22;color:${vc};border:1px solid ${vc}44">${c.is_verified==1?'VERIFIED':'UNVERIFIED'}</span>
+      </div>
+      <div class="order-details">
+        <span style="font-size:12px;color:var(--muted)">${esc(c.email||'')}</span>
+        <span style="font-size:12px">${c.order_count||0} order${c.order_count==1?'':'s'}</span>
+        <span class="order-price">AED ${val}</span>
+      </div>
+      <div class="order-actions">
+        <span class="order-date">Last order: ${dt}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function showCustomerDetail(id){
+  document.getElementById('customersListWrap').style.display = 'none';
+  const detail = document.getElementById('customerDetail');
+  detail.style.display = 'block';
+  document.getElementById('customerDetailBody').innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">Loading…</div>';
+  try {
+    const r = await fetch('/api/customers.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({admin_password:ADMIN_PASS,customer_id:id})});
+    const d = await r.json();
+    if(!d.success) throw new Error(d.error||'Failed');
+    renderCustomerDetail(d.customer, d.orders||[]);
+  } catch(e){
+    document.getElementById('customerDetailBody').innerHTML = '<div style="text-align:center;padding:40px;color:var(--red);font-size:12px">Failed: '+e.message+'</div>';
+  }
+}
+
+function renderCustomerDetail(c, orders){
+  const joined = new Date(c.created_at).toLocaleDateString('en-AE',{dateStyle:'medium'});
+  const vc = c.is_verified==1 ? 'var(--green)' : '#fbbf24';
+  const sc = {pending:'#fbbf24',approved:'#22C55E',cancelled:'#EF4444',completed:'#818cf8'};
+  const ordersHtml = orders.length ? orders.map(o=>{
+    const clr = sc[o.status||'pending']||'#fbbf24';
+    const mc  = (o.metal||'').toLowerCase()==='gold'?'var(--gold)':'#b0bac8';
+    const tc  = o.type==='buy'?'var(--green)':'var(--red)';
+    const dt  = new Date(o.created_at).toLocaleString('en-AE',{dateStyle:'short',timeStyle:'short'});
+    const pr  = parseFloat(o.price_aed||0).toLocaleString('en-AE',{minimumFractionDigits:2,maximumFractionDigits:2});
+    return `<div class="order-card" style="border-left-color:${clr}">
+      <div class="order-hdr">
+        <div><span class="order-id">#${o.id}</span></div>
+        <span class="status-pill" style="background:${clr}22;color:${clr};border:1px solid ${clr}44">${(o.status||'PENDING').toUpperCase()}</span>
+      </div>
+      ${o.admin_notes||o.notes?`<div class="order-note">📝 ${esc(o.admin_notes||o.notes)}</div>`:''}
+      <div class="order-details">
+        <span style="font-size:12px;font-weight:700;color:${mc}">${esc(o.purity||'')} ${(o.metal||'').toUpperCase()}</span>
+        <span style="font-size:10px;font-weight:800;color:${tc};background:${tc}18;padding:2px 7px;border-radius:4px;border:1px solid ${tc}33">${(o.type||'BUY').toUpperCase()}</span>
+        <span style="font-size:12px">${o.weight} ${o.unit||''}</span>
+        <span class="order-price">AED ${pr}</span>
+      </div>
+      <div class="order-actions"><span class="order-date">${dt}</span></div>
+    </div>`;
+  }).join('') : '<div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">No orders yet</div>';
+
+  document.getElementById('customerDetailBody').innerHTML = `
+    <div class="order-card" style="border-left-color:${vc};margin-bottom:16px">
+      <div class="order-hdr">
+        <div><span class="order-name" style="font-size:16px">${esc(c.name||'Unknown')}</span></div>
+        <span class="status-pill" style="background:${vc}22;color:${vc};border:1px solid ${vc}44">${c.is_verified==1?'VERIFIED':'UNVERIFIED'}</span>
+      </div>
+      <div class="order-details" style="flex-direction:column;align-items:flex-start;gap:6px">
+        <span style="font-size:12px;color:var(--muted)">📧 ${esc(c.email||'—')}</span>
+        <span style="font-size:12px;color:var(--muted)">📞 ${esc(c.phone||'—')}</span>
+        <span style="font-size:12px;color:var(--muted)">🗓 Joined ${joined}</span>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);letter-spacing:.08em;margin:16px 0 10px">ORDER HISTORY (${orders.length})</div>
+    ${ordersHtml}
+  `;
+}
+
+function backToCustomerList(){
+  document.getElementById('customerDetail').style.display = 'none';
+  document.getElementById('customersListWrap').style.display = 'block';
 }
 
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
