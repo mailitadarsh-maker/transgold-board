@@ -9,7 +9,7 @@
 :root{
   --gold:#D4A94A;--gold-dim:#8A6A1F;
   --bg:#090909;--bg2:#0F0F0F;--bg3:#161616;--bg4:#1C1C1C;
-  --green:#22C55E;--red:#EF4444;--silver:#B0BAC8;
+  --green:#D4A94A;--red:#EF4444;--silver:#B0BAC8;
   --border:rgba(255,255,255,0.07);
   --border-gold:rgba(212,169,74,0.2);
   --text:#F0EBE0;--muted:#6B6660;
@@ -54,7 +54,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .topbar{height:54px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
 .topbar-title{font-size:14px;font-weight:700;color:var(--text);letter-spacing:.04em}
 .topbar-right{display:flex;align-items:center;gap:12px}
-.live-pill{display:flex;align-items:center;gap:6px;font-size:9px;font-weight:800;letter-spacing:.15em;color:var(--green);padding:5px 12px;border:1px solid rgba(34,197,94,.3);border-radius:20px;background:rgba(34,197,94,.06)}
+.live-pill{display:flex;align-items:center;gap:6px;font-size:9px;font-weight:800;letter-spacing:.15em;color:var(--green);padding:5px 12px;border:1px solid rgba(212,169,74,.3);border-radius:20px;background:rgba(212,169,74,.06)}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.8s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 .topbar-time{font-size:12px;font-weight:700;color:var(--muted)}
@@ -110,8 +110,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .btn-gold:hover{background:#e8b84b}
 .btn-outline{background:transparent;border:1px solid var(--border-gold);color:var(--gold)}
 .btn-outline:hover{background:rgba(212,169,74,.08)}
-.btn-green{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--green)}
-.btn-green:hover{background:rgba(34,197,94,.2)}
+.btn-green{background:rgba(212,169,74,.12);border:1px solid rgba(212,169,74,.3);color:var(--green)}
+.btn-green:hover{background:rgba(212,169,74,.2)}
 .btn-red{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--red)}
 .btn-red:hover{background:rgba(239,68,68,.18)}
 .btn-purple{background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);color:#818cf8}
@@ -772,7 +772,7 @@ function renderOrders(){
   const list   = filter==='all' ? ordersData : ordersData.filter(o=>(o.status||'pending')===filter);
   const cont   = document.getElementById('ordersList');
   if(!list.length){ cont.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:12px">No orders</div>'; return; }
-  const sc = {pending:'#fbbf24',approved:'#22C55E',cancelled:'#EF4444',completed:'#818cf8'};
+  const sc = {pending:'#fbbf24',approved:'#D4A94A',cancelled:'#EF4444',completed:'#818cf8'};
   cont.innerHTML = list.map(o=>{
     const clr = sc[o.status||'pending']||'#fbbf24';
     const mc  = (o.metal||'').toLowerCase()==='gold'?'var(--gold)':'#b0bac8';
@@ -871,7 +871,7 @@ async function showCustomerDetail(id){
 function renderCustomerDetail(c, orders){
   const joined = new Date(c.created_at).toLocaleDateString('en-AE',{dateStyle:'medium'});
   const vc = c.is_verified==1 ? 'var(--green)' : '#fbbf24';
-  const sc = {pending:'#fbbf24',approved:'#22C55E',cancelled:'#EF4444',completed:'#818cf8'};
+  const sc = {pending:'#fbbf24',approved:'#D4A94A',cancelled:'#EF4444',completed:'#818cf8'};
   const ordersHtml = orders.length ? orders.map(o=>{
     const clr = sc[o.status||'pending']||'#fbbf24';
     const mc  = (o.metal||'').toLowerCase()==='gold'?'var(--gold)':'#b0bac8';
@@ -1030,8 +1030,8 @@ async function loadMedia(){
 function toast(msg, type){
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.style.background = type==='err' ? 'rgba(239,68,68,.15)' : 'rgba(34,197,94,.15)';
-  t.style.border = '1px solid '+(type==='err'?'rgba(239,68,68,.4)':'rgba(34,197,94,.4)');
+  t.style.background = type==='err' ? 'rgba(239,68,68,.15)' : 'rgba(212,169,74,.15)';
+  t.style.border = '1px solid '+(type==='err'?'rgba(239,68,68,.4)':'rgba(212,169,74,.4)');
   t.style.color  = type==='err' ? 'var(--red)' : 'var(--green)';
   t.style.display = 'block';
   setTimeout(()=>t.style.display='none', 2500);
