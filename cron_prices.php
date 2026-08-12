@@ -1,15 +1,36 @@
 <?php
 date_default_timezone_set('Asia/Dubai');
 
-$proxyBase = 'https://priceboard.transgoldmarkets.com/api/proxy.php?url=';
-$goldRaw   = @file_get_contents($proxyBase . urlencode('https://portal.arakkalmarkets.com/getprice/GOLD'));
-$silverRaw = @file_get_contents($proxyBase . urlencode('https://portal.arakkalmarkets.com/getprice/SILVER'));
+// --- GoldVaultApp price source ---
+$goldVaultKey = '7e8YKZCZ2kK2_FXAFKefifcHggibYk5tQ6SAAb7vXsM';
 
-preg_match_all('/<span class=sf-dump-num>([0-9.]+)<\/span>/', $goldRaw, $gm);
-preg_match_all('/<span class=sf-dump-num>([0-9.]+)<\/span>/', $silverRaw, $sm);
+function fetchGoldVaultPrice($symbol, $apiKey) {
+    $url = 'https://metalprice.goldvaultapp.com/getprice/' . $symbol;
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['X-API-Key: ' . $apiKey]);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+    $raw = curl_exec($ch);
+    $err = curl_error($ch);
+    curl_close($ch);
 
-$gold   = isset($gm[1][1]) ? floatval($gm[1][1]) : null;
-$silver = isset($sm[1][1]) ? floatval($sm[1][1]) : null;
+    if ($raw === false || $raw === '') {
+        return null;
+    }
+    $data = json_decode($raw, true);
+    if (!is_array($data) || !isset($data['bid']) || !isset($data['ask'])) {
+        return null;
+    }
+    return $data; // ['symbol'=>.., 'bid'=>.., 'ask'=>.., 'time'=>..]
+}
+
+$goldData   = fetchGoldVaultPrice('XAUUSD', $goldVaultKey);
+$silverData = fetchGoldVaultPrice('XAGUSD', $goldVaultKey);
+
+// Mid price keeps prices.json's existing shape (single number per metal),
+// same convention the old arakkalmarkets feed used.
+$gold   = $goldData   ? round(($goldData['bid'] + $goldData['ask']) / 2, 2)   : null;
+$silver = $silverData ? round(($silverData['bid'] + $silverData['ask']) / 2, 2) : null;
 
 if ($gold && $silver) {
     $json = json_encode(['gold' => $gold, 'silver' => $silver, 'ok' => true, 'ts' => time()]);
