@@ -1456,7 +1456,7 @@ function toast(msg,type){
 // ── LIVE PRICE FETCH ──────────────────────────────────────────────────────────
 async function fetchLivePrices() {
   try {
-    const r = await fetch('prices.php?t=' + Date.now());
+    const r = await fetch('api/live_price.php?t=' + Date.now());
     const d = await r.json();
     if (d.ok && d.gold) {
       const prevGold   = spotUSD.gold;
@@ -1697,7 +1697,7 @@ loadShopInfo();
 
 setInterval(updateClock,1000);
 setInterval(updatePrices,2000);
-setInterval(fetchLivePrices, 8*1000); // refresh every 8s
+setInterval(fetchLivePrices, 1500); // refresh every 1.5s (near-live)
 
 // Safety net: force a full page reload every 60s so the board can never get
 // permanently stuck showing a stale price if the live fetch loop stalls for

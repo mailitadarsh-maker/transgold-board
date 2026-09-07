@@ -698,7 +698,7 @@ async function loadSpread(){
 // ── LIVE PRICES ───────────────────────────────────────────────────────────────
 async function fetchPrices(){
   try {
-    const r = await fetch('/api/prices.php');
+    const r = await fetch('/api/live_price.php');
     const d = await r.json();
     if(d.ok && d.gold){
       spotUSD.gold   = d.gold;
@@ -1045,7 +1045,7 @@ function init(){
   loadShopInfo();
   loadOrders();
   fetchPrices();
-  setInterval(fetchPrices, 10000);
+  setInterval(fetchPrices, 1500);
 }
 </script>
 </body>

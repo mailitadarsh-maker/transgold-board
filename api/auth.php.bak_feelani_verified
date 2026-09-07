@@ -23,20 +23,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['token'])) {
   header('Content-Type: text/html');
   echo "
   <html>
-  <head><title>Verified — Feelani</title>
+  <head><title>Verified — Transgold Markets</title>
   <style>
-    body { font-family: Arial, Helvetica, sans-serif; background: #0a0a0a; color: #fff; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
-    .box { text-align:center; padding:44px 40px; border:1px solid #D4AF37; border-radius:16px; background:#141414; max-width:420px; }
-    .brand { font-family: Georgia, serif; font-size:22px; font-weight:800; letter-spacing:4px; color:#D4AF37; margin-bottom:18px; }
-    h2 { color: #D4AF37; margin:0 0 12px 0; }
-    p { color: #aaa; margin:6px 0; }
+    body { font-family: Arial; background: #0a0a0a; color: #fff; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
+    .box { text-align:center; padding:40px; border:1px solid #1DB954; border-radius:16px; }
+    h2 { color: #1DB954; }
+    p { color: #aaa; }
   </style>
   </head>
   <body>
     <div class='box'>
-      <div class='brand'>FEELANI</div>
-      <h2>&#10003; Email Verified!</h2>
-      <p>Your Feelani account is now active.</p>
+      <h2>✓ Email Verified!</h2>
+      <p>Your Transgold Markets account is now active.</p>
       <p>You can now log in on the app.</p>
     </div>
   </body>

@@ -2,7 +2,7 @@
 define('DB_HOST', '127.0.0.1');
 define('DB_NAME', 'u561967956_Transgold');
 define('DB_USER', 'u561967956_Transgold');
-define('DB_PASS', 'Trans@Gold@007');
+define('DB_PASS', 'Gvhq@123');
 
 function getDB() {
   static $pdo = null;

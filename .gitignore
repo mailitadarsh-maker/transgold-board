@@ -26,3 +26,4 @@ daily_hilo.json
 # Server-owned runtime state — must never be tracked or reset by deploys
 spread.json
 prices.json
+live_price_cache.json
