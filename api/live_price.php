@@ -9,7 +9,7 @@ $cacheFile  = __DIR__ . '/../live_price_cache.json';
 $pricesFile = __DIR__ . '/../prices.json';
 $hiloFile   = __DIR__ . '/../daily_hilo.json';
 $spreadFile = __DIR__ . '/../spread.json';
-$ttl = 2; // seconds — floor to avoid hammering GoldVaultApp under concurrent load
+$ttl = 1; // seconds — floor to avoid hammering GoldVaultApp under concurrent load
 
 if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $ttl) {
     readfile($cacheFile);

@@ -1697,7 +1697,7 @@ loadShopInfo();
 
 setInterval(updateClock,1000);
 setInterval(updatePrices,2000);
-setInterval(fetchLivePrices, 1500); // refresh every 1.5s (near-live)
+setInterval(fetchLivePrices, 1000); // refresh every 1.5s (near-live)
 
 // Safety net: force a full page reload every 60s so the board can never get
 // permanently stuck showing a stale price if the live fetch loop stalls for
